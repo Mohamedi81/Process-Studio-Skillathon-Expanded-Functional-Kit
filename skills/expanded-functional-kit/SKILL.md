@@ -39,17 +39,20 @@ Work from what you were given. Use these defaults and report them in your final 
    - One screen per human decision. Use the `hitl_panel` component for every AMBER or RED review: proposal, evidence with citations, confidence, SLA, override reasons, actions.
    - Every screen field is mapped in `mappings` to an integration field (`json_path`) and a dictionary field (`ref`). No unmapped screen, no orphan integration.
    - 3 to 5 reports. Each serves named use cases and wireframes, has KPI formulas, and includes one report on HITL acceptance and override rates.
-4. **Write the spec**: author `kit-spec.json` and save it with `write_temp_file`. Keep strings short. Do not repeat blueprint prose.
-5. **Build** each deliverable with `run_skill_script`, one call each, `--input kit-spec.json`:
-   - `build_data_dictionary.py` with `--output data-dictionary.xlsx`
-   - `build_wireframes.py` with `--output wireframes.html`
-   - `build_figma_svg.py` with `--output figma-wireframes.svg`
-   - `build_bpmn.py` with `--output process.bpmn`
-   - `build_integration_mapping.py` with `--output integration-mapping.xlsx`
-   - `build_reporting.py` with `--output reporting-requirements.html`
+4. **Check before you write.** The build is ONE script call and a failed call may not be repeatable, so get the spec right the first time. Read `references/kit-spec-schema.md` and tick off:
+   - every ID you reference exists (step `lane`, `screen_ids`, `integration_ids`, mapping `screen_id` and `integration_id`, use case and report links);
+   - every dictionary reference is `ENTITYID.field_name` and that field exists;
+   - every mapping `json_path` is a `field` of that integration, in `request` for write and `response` for read, with the same `ref`;
+   - every step except `end` has a `next` list, and only gateways have several;
+   - every chart and timeline item has a `label`, every chart item a numeric `value`;
+   - every table row has as many cells as `headers`;
+   - lists are JSON lists, text is plain text, no emojis.
+5. **Write the spec** once: author `kit-spec.json` and save it with ONE `write_temp_file` call. Keep strings short. Do not repeat blueprint prose.
+6. **Build** with ONE `run_skill_script` call: script `build_kit.py`, `--input kit-spec.json`, `--output functional-kit.zip`. It validates, writes the six deliverables and packs them into the zip. Do not call any other script.
+   - On `FAIL` the error lists every issue. Fix `kit-spec.json`, save it again and call `build_kit.py` once more. If the runtime refuses a further run (for example "already started"), stop and report the issues you could not resolve. Do not loop.
+7. **Deliver**: save `functional-kit.zip` with `save_output_file`. Then save each of the six files that exist in the temp directory (`data-dictionary.xlsx`, `wireframes.html`, `figma-wireframes.svg`, `process.bpmn`, `integration-mapping.xlsx`, `reporting-requirements.html`). If saving a single file fails, continue with the rest. Reply with a short summary: number of roles, screens, flow steps (how many deterministic, agentic, human), integrations (how many agentic plug-in points), reports; which look and feel was used and where it came from; the defaults and assumptions used; which figures are illustrative; and how to import the SVG into Figma.
 
-   The first script that runs validates the spec. If it fails, the error lists every issue. Fix `kit-spec.json`, save it again and re-run. Repeat until it passes. All six scripts then pass.
-6. **Deliver**: save all six files with `save_output_file`. Reply with a short summary: number of roles, screens, flow steps (how many deterministic, agentic, human), integrations (how many agentic plug-in points), reports; which look and feel was used and where it came from; the defaults and assumptions used; which figures are illustrative; and how to import the SVG into Figma.
+The six `build_*.py` scripts also exist for single deliverables. `build_kit.py` runs all of them.
 
 ## Rules
 - **No emojis or pictograph glyphs** anywhere. The build fails on them. Use words.

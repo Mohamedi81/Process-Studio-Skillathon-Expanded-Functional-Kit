@@ -174,11 +174,160 @@ def strings_in(obj):
 
 
 # ----------------------------------------------------------------- validation
+def check_shapes(spec):
+    """Structure pre-check: wrong JSON types, reported by path so the author can fix them.
+
+    The deeper validation assumes these shapes, so it only runs when this list is empty.
+    """
+    E = []
+
+    def is_list(v):
+        return isinstance(v, list)
+
+    def objs(v, path):
+        """Expect a list of objects."""
+        if v is None:
+            return []
+        if not is_list(v):
+            E.append("%s must be a list" % path)
+            return []
+        out = []
+        for i, x in enumerate(v):
+            if isinstance(x, dict):
+                out.append((i, x))
+            else:
+                E.append("%s[%d] must be an object, got %s" % (path, i, type(x).__name__))
+        return out
+
+    def strs(v, path):
+        """Expect a list of strings."""
+        if v is None:
+            return
+        if not is_list(v):
+            E.append("%s must be a list of strings" % path)
+            return
+        for i, x in enumerate(v):
+            if not isinstance(x, str):
+                E.append("%s[%d] must be a string, got %s" % (path, i, type(x).__name__))
+
+    def scalar(d, key, path, kinds=(str,)):
+        v = d.get(key)
+        if v is not None and not isinstance(v, kinds):
+            E.append("%s.%s must be %s, got %s" % (path, key, "/".join(k.__name__ for k in kinds), type(v).__name__))
+
+    for key in ("meta", "theme"):
+        if spec.get(key) is not None and not isinstance(spec.get(key), dict):
+            E.append("'%s' must be an object" % key)
+    for key in ("lanes", "entities", "integrations", "steps", "screens", "mappings", "use_cases", "reports"):
+        if key in spec and not is_list(spec[key]):
+            E.append("'%s' must be a list" % key)
+    if E:
+        return E
+
+    for i, ln in objs(spec.get("lanes"), "lanes"):
+        for k in ("id", "name", "kind"):
+            scalar(ln, k, "lanes[%d]" % i)
+    for i, e in objs(spec.get("entities"), "entities"):
+        p = "entities[%d]" % i
+        for k in ("id", "name", "definition"):
+            scalar(e, k, p)
+        for j, f in objs(e.get("fields"), p + ".fields"):
+            for k in ("name", "label", "definition", "type"):
+                scalar(f, k, "%s.fields[%d]" % (p, j))
+            strs(f.get("allowed_values"), "%s.fields[%d].allowed_values" % (p, j))
+    for i, it in objs(spec.get("integrations"), "integrations"):
+        p = "integrations[%d]" % i
+        for k in ("id", "kind", "pattern", "direction", "mcp_tool"):
+            scalar(it, k, p)
+        for sect in ("request", "response"):
+            for j, x in objs(it.get(sect), "%s.%s" % (p, sect)):
+                for k in ("field", "ref"):
+                    scalar(x, k, "%s.%s[%d]" % (p, sect, j))
+        objs(it.get("errors"), p + ".errors")
+    for i, s in objs(spec.get("steps"), "steps"):
+        p = "steps[%d]" % i
+        for k in ("id", "type", "lane", "gateway", "zone"):
+            scalar(s, k, p)
+        for j, n in objs(s.get("next"), p + ".next"):
+            scalar(n, "to", "%s.next[%d]" % (p, j))
+        for k in ("integration_ids", "reads", "writes", "screen_ids"):
+            strs(s.get(k), "%s.%s" % (p, k))
+    for i, sc in objs(spec.get("screens"), "screens"):
+        p = "screens[%d]" % i
+        for k in ("id", "lane", "pattern", "active_nav"):
+            scalar(sc, k, p)
+        strs(sc.get("nav"), p + ".nav")
+        strs(sc.get("notes"), p + ".notes")
+        if sc.get("status") is not None and not isinstance(sc.get("status"), (dict, str)):
+            E.append("%s.status must be an object {text, tone}" % p)
+        check_components(sc.get("components"), p + ".components", objs, strs, scalar, E)
+    for i, u in objs(spec.get("use_cases"), "use_cases"):
+        p = "use_cases[%d]" % i
+        for k in ("id", "lane"):
+            scalar(u, k, p)
+        strs(u.get("screen_ids"), p + ".screen_ids")
+        strs(u.get("step_ids"), p + ".step_ids")
+    for i, m in objs(spec.get("mappings"), "mappings"):
+        for k in ("screen_id", "integration_id", "ui_field", "json_path", "direction", "ref"):
+            scalar(m, k, "mappings[%d]" % i)
+    for i, r in objs(spec.get("reports"), "reports"):
+        p = "reports[%d]" % i
+        for k in ("id", "lane"):
+            scalar(r, k, p)
+        for k in ("use_case_ids", "screen_ids", "dimensions", "filters", "exports", "alerts", "nav"):
+            strs(r.get(k), "%s.%s" % (p, k))
+        check_components(r.get("components"), p + ".components", objs, strs, scalar, E)
+        for j, k in objs(r.get("kpis"), p + ".kpis"):
+            for key in ("name", "definition", "formula", "unit", "source"):
+                scalar(k, key, "%s.kpis[%d]" % (p, j))
+            strs(k.get("refs"), "%s.kpis[%d].refs" % (p, j))
+    return E
+
+
+def check_components(comps, path, objs, strs, scalar, E):
+    for i, c in objs(comps, path):
+        p = "%s[%d]" % (path, i)
+        scalar(c, "type", p)
+        t = c.get("type")
+        if t in ("stepper", "tabs", "filters"):
+            strs(c.get("items"), p + ".items")
+        if t in ("kpis", "bar_chart", "line_chart", "donut_chart", "timeline"):
+            objs(c.get("items"), p + ".items")
+        if t == "actions":
+            for j, a in enumerate(c.get("items") or []):
+                if not isinstance(a, (str, dict)):
+                    E.append("%s.items[%d] must be a string or object" % (p, j))
+        if t == "table":
+            strs(c.get("headers"), p + ".headers")
+            if not isinstance(c.get("rows") or [], list):
+                E.append("%s.rows must be a list of rows" % p)
+            else:
+                for j, row in enumerate(c.get("rows") or []):
+                    if not isinstance(row, list):
+                        E.append("%s.rows[%d] must be a list of cells" % (p, j))
+            strs(c.get("refs"), p + ".refs")
+        if t == "form":
+            for j, f in objs(c.get("fields"), p + ".fields"):
+                for k in ("label", "type", "ref"):
+                    scalar(f, k, "%s.fields[%d]" % (p, j))
+        if t == "hitl_panel":
+            strs(c.get("evidence"), p + ".evidence")
+            strs(c.get("override_reasons"), p + ".override_reasons")
+            if c.get("actions") is not None and not isinstance(c.get("actions"), list):
+                E.append("%s.actions must be a list" % p)
+        span = c.get("span")
+        if span is not None and (isinstance(span, bool) or not isinstance(span, int)):
+            E.append("%s.span must be an integer 1..12" % p)
+
+
 def validate_spec(spec):
     """Return a list of problem strings. Empty list means the spec is valid."""
     E = []
     if not isinstance(spec, dict):
         return ["spec must be a JSON object"]
+    shape = check_shapes(spec)
+    if shape:
+        return shape
 
     def need(cond, msg):
         if not cond:
@@ -420,6 +569,12 @@ def validate_spec(spec):
         if t == "hitl_panel":
             need(c.get("zone") in ("AMBER", "RED"), "%s: hitl_panel zone must be AMBER or RED" % where)
             need(c.get("actions"), "%s: hitl_panel needs actions" % where)
+        if t in ("bar_chart", "line_chart", "donut_chart", "timeline"):
+            for it in c.get("items") or []:
+                if not it.get("label"):
+                    E.append("%s: every %s item needs a 'label'" % (where, t))
+                    break
+
         if t in ("kpis", "bar_chart", "line_chart", "donut_chart"):
             for it in c.get("items") or []:
                 if t != "kpis" and not isinstance(it.get("value"), (int, float)):

@@ -1,5 +1,11 @@
 {
   "scripts": {
+    "build_kit.py": {
+      "arguments": {
+        "--input": { "type": "input_path", "required": true },
+        "--output": { "type": "output_path", "required": true }
+      }
+    },
     "build_wireframes.py": {
       "arguments": {
         "--input": { "type": "input_path", "required": true },
