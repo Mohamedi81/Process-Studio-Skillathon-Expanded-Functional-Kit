@@ -48,14 +48,16 @@ Work from what you were given. Use these defaults and report them in your final 
    - every table row has as many cells as `headers`;
    - lists are JSON lists, text is plain text, no emojis.
 5. **Write the spec** once: author `kit-spec.json` and save it with ONE `write_temp_file` call. Keep strings short. Do not repeat blueprint prose.
-6. **Build** with ONE `run_skill_script` call: script `build_kit.py`, `--input kit-spec.json`, `--output functional-kit.zip`. It validates, writes the six deliverables and packs them into the zip. Do not call any other script.
-   - On `FAIL` the error lists every issue. Fix `kit-spec.json`, save it again and call `build_kit.py` once more. If the runtime refuses a further run (for example "already started"), stop and report the issues you could not resolve. Do not loop.
-7. **Deliver**: save `functional-kit.zip` with `save_output_file`. Then save each of the six files that exist in the temp directory (`data-dictionary.xlsx`, `wireframes.html`, `figma-wireframes.svg`, `process.bpmn`, `integration-mapping.xlsx`, `reporting-requirements.html`). If saving a single file fails, continue with the rest. Reply with a short summary: number of roles, screens, flow steps (how many deterministic, agentic, human), integrations (how many agentic plug-in points), reports; which look and feel was used and where it came from; the defaults and assumptions used; which figures are illustrative; and how to import the SVG into Figma.
+6. **Build** with ONE `run_skill_script` call: script `build_kit.py`, `--input kit-spec.json`, `--output functional-kit.zip`. Do not call any other script, and do not call it a second time in the same request.
+   - The script does not fail on spec problems. It builds every deliverable it can, writes `validation-report.md` (every spec issue, and the status of each deliverable) and packs all of it into the zip. It also prints the report, so read the tool result.
+7. **Deliver**: save `validation-report.md` first with `save_output_file`, then `functional-kit.zip`, then each file the report marks "built" (`data-dictionary.xlsx`, `wireframes.html`, `figma-wireframes.svg`, `process.bpmn`, `integration-mapping.xlsx`, `reporting-requirements.html`). If saving one file fails, continue with the rest.
+8. **Reply** with a short summary: number of roles, screens, flow steps (how many deterministic, agentic, human), integrations (how many agentic plug-in points), reports; which look and feel was used and where it came from; the defaults and assumptions used; which figures are illustrative; and how to import the SVG into Figma.
+   - If the report lists issues, say so plainly: quote them, say which deliverables may be incomplete or inconsistent, and say they are fixed by correcting `kit-spec.json` and asking for a new build. Do not re-run the script yourself and do not claim the kit is clean.
 
 The six `build_*.py` scripts also exist for single deliverables. `build_kit.py` runs all of them.
 
 ## Rules
-- **No emojis or pictograph glyphs** anywhere. The build fails on them. Use words.
+- **No emojis or pictograph glyphs** anywhere. The validator reports them. Use words.
 - Every agentic step needs a direct hand-over to a human step and `integration_ids` with `kind: agentic` and an `mcp_tool`. Deterministic steps need a `rule` and zone GREEN.
 - RED-zone panels never offer "approve" or "cleared" as the agent's verdict. The agent proposes, the named role decides.
 - Reuse the blueprint's IDs (ATS, AGN, TOL, DPS) in names so the kit traces back to it.
