@@ -1,0 +1,40 @@
+{
+  "scripts": {
+    "build_wireframes.py": {
+      "arguments": {
+        "--input": { "type": "input_path", "required": true },
+        "--output": { "type": "output_path", "required": true }
+      }
+    },
+    "build_figma_svg.py": {
+      "arguments": {
+        "--input": { "type": "input_path", "required": true },
+        "--output": { "type": "output_path", "required": true }
+      }
+    },
+    "build_bpmn.py": {
+      "arguments": {
+        "--input": { "type": "input_path", "required": true },
+        "--output": { "type": "output_path", "required": true }
+      }
+    },
+    "build_data_dictionary.py": {
+      "arguments": {
+        "--input": { "type": "input_path", "required": true },
+        "--output": { "type": "output_path", "required": true }
+      }
+    },
+    "build_integration_mapping.py": {
+      "arguments": {
+        "--input": { "type": "input_path", "required": true },
+        "--output": { "type": "output_path", "required": true }
+      }
+    },
+    "build_reporting.py": {
+      "arguments": {
+        "--input": { "type": "input_path", "required": true },
+        "--output": { "type": "output_path", "required": true }
+      }
+    }
+  }
+}

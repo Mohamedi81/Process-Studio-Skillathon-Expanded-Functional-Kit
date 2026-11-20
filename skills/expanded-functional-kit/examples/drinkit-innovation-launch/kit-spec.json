@@ -1,0 +1,4231 @@
+{
+  "meta": {
+    "title": "Product Innovation Launch: Expanded Functional Kit",
+    "industry": "Consumer goods (beverages)",
+    "blueprint_name": "product-innovation-launch(2).md",
+    "version": "v1",
+    "illustrative_note": "Record IDs, project names and figures on screens are illustrative. Targets marked assumed are not in the client material.",
+    "integration_note": "Protocols, authentication and latency marked assumed in the blueprint remain assumptions to confirm with Drinkit integration owners."
+  },
+  "theme": {
+    "brand_name": "Drinkit I2S",
+    "source": "Harvested from i2s_navigator_v11.html (existing I2S To-Be Navigator): blue top bar, Segoe UI/system font, 4 px radius",
+    "font": "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    "font_figma": "Segoe UI",
+    "primary": "#0052cc",
+    "primary_dark": "#0747a6",
+    "nav_bg": "#0052cc",
+    "nav_text": "#ffffff",
+    "bg": "#f4f5f7",
+    "surface": "#ffffff",
+    "text": "#172b4d",
+    "muted": "#6b778c",
+    "border": "#dfe1e6",
+    "success": "#006644",
+    "warning": "#f6c900",
+    "danger": "#ff5630",
+    "radius": 4
+  },
+  "lanes": [
+    {
+      "id": "pmi",
+      "name": "Innovation Project Manager (PM-I)",
+      "kind": "role"
+    },
+    {
+      "id": "ra",
+      "name": "Regulatory Affairs Specialist (RA)",
+      "kind": "role"
+    },
+    {
+      "id": "isc",
+      "name": "ISC chair and secretariat",
+      "kind": "role"
+    },
+    {
+      "id": "eng",
+      "name": "Deterministic rule engine (AGN2 / AGN4 backbone)",
+      "kind": "system"
+    },
+    {
+      "id": "agn1",
+      "name": "AGN1 Idea Intake and Screening Agent",
+      "kind": "agent"
+    },
+    {
+      "id": "agn3",
+      "name": "AGN3 Gate Narrative Drafting Agent",
+      "kind": "agent"
+    },
+    {
+      "id": "agn5",
+      "name": "AGN5 Regulatory Pre-Screen Agent",
+      "kind": "agent"
+    },
+    {
+      "id": "agn6",
+      "name": "AGN6 Post-Launch Review Agent",
+      "kind": "agent"
+    }
+  ],
+  "entities": [
+    {
+      "id": "IDEA",
+      "name": "Idea",
+      "definition": "A product idea submitted through the Idea Box or by a Brand Manager email.",
+      "owner": "Innovation Project Manager (PM-I)",
+      "system_of_record": "Idea Log (Idea_Log_MASTER.xlsx)",
+      "regulatory_class": "PII, Trade Secret",
+      "retention": "7 years (assumed)",
+      "fields": [
+        {
+          "name": "idea_id",
+          "label": "Idea ID",
+          "definition": "Unique ID assigned at registration.",
+          "type": "id",
+          "required": true,
+          "format": "IDX-YYYY-nnn",
+          "example": "IDX-2026-041",
+          "validation": "Unique; next free number"
+        },
+        {
+          "name": "title",
+          "label": "Idea title",
+          "definition": "Short name of the idea as submitted.",
+          "type": "string",
+          "required": true,
+          "example": "Zero-sugar yuzu sparkling 330 ml can"
+        },
+        {
+          "name": "flavour",
+          "label": "Flavour",
+          "definition": "Flavour named in the submission.",
+          "type": "string",
+          "required": false,
+          "example": "Yuzu"
+        },
+        {
+          "name": "target_consumer",
+          "label": "Target consumer",
+          "definition": "Consumer segment named in the Idea Box answers.",
+          "type": "string",
+          "required": true,
+          "example": "Urban 25-34 health-aware"
+        },
+        {
+          "name": "status",
+          "label": "Idea status",
+          "definition": "Lifecycle state of the idea in the Idea Log.",
+          "type": "enum",
+          "required": true,
+          "allowed_values": [
+            "Registered",
+            "Duplicate check pending",
+            "Scored",
+            "Parked",
+            "Rejected",
+            "Proceed"
+          ],
+          "example": "Registered",
+          "pii": "No"
+        },
+        {
+          "name": "weighted_score",
+          "label": "Weighted screening score",
+          "definition": "Weighted sum of the eight 1-10 criteria; above 60 qualifies for the monthly screening.",
+          "type": "decimal",
+          "required": false,
+          "format": "0.0",
+          "example": "68.5",
+          "validation": "0 to 100"
+        },
+        {
+          "name": "review_date",
+          "label": "Review date",
+          "definition": "Date a Parked idea is reviewed again (closes the SOP 'no review date' gap).",
+          "type": "date",
+          "required": false,
+          "example": "2027-02-15"
+        }
+      ]
+    },
+    {
+      "id": "DUP",
+      "name": "Duplicate link",
+      "definition": "An agent-proposed relation between a new idea and an existing idea or project, ruled on by the PM-I.",
+      "owner": "PM-I",
+      "system_of_record": "Innovation Tracker",
+      "regulatory_class": "Trade Secret",
+      "retention": "7 years (assumed)",
+      "fields": [
+        {
+          "name": "link_id",
+          "label": "Link ID",
+          "definition": "Unique ID of the proposed link.",
+          "type": "id",
+          "required": true,
+          "example": "DL-2026-0117"
+        },
+        {
+          "name": "matched_id",
+          "label": "Matched record",
+          "definition": "Idea ID or project code of the candidate match.",
+          "type": "string",
+          "required": true,
+          "example": "PRJ-0311"
+        },
+        {
+          "name": "relation",
+          "label": "Proposed relation",
+          "definition": "Relation proposed by the agent.",
+          "type": "enum",
+          "required": true,
+          "allowed_values": [
+            "Duplicate",
+            "Related",
+            "Variant",
+            "None"
+          ],
+          "example": "Related"
+        },
+        {
+          "name": "similarity",
+          "label": "Similarity",
+          "definition": "Similarity score from hybrid retrieval, 0 to 1.",
+          "type": "decimal",
+          "required": true,
+          "format": "0.00",
+          "example": "0.83"
+        },
+        {
+          "name": "confidence",
+          "label": "Agent confidence",
+          "definition": "Agent confidence in the proposed relation, 0 to 1. Below 0.70 the item is marked Needs PM-I review.",
+          "type": "decimal",
+          "required": true,
+          "format": "0.00",
+          "example": "0.81"
+        },
+        {
+          "name": "rationale",
+          "label": "Similarity rationale",
+          "definition": "Overlap on flavour, format, benefit, target consumer and occasion, with the cited record IDs.",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "decision",
+          "label": "PM-I ruling",
+          "definition": "Decision taken by the PM-I.",
+          "type": "enum",
+          "required": false,
+          "allowed_values": [
+            "Approve link",
+            "Reject link",
+            "Modify",
+            "Escalate to BM"
+          ]
+        },
+        {
+          "name": "override_reason",
+          "label": "Override reason",
+          "definition": "Mandatory when the PM-I changes the proposal.",
+          "type": "enum",
+          "required": false,
+          "allowed_values": [
+            "Different benefit",
+            "Different format",
+            "Different market",
+            "Killed for unrelated reason"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PROJ",
+      "name": "Innovation project",
+      "definition": "A project opened when an idea proceeds, tracked through G0 to G5.",
+      "owner": "PM-I",
+      "system_of_record": "Innovation Tracker (Excel, SharePoint)",
+      "regulatory_class": "Trade Secret, Business Confidential",
+      "retention": "10 years (assumed)",
+      "fields": [
+        {
+          "name": "project_code",
+          "label": "Project code",
+          "definition": "Unique project identifier in the Tracker.",
+          "type": "id",
+          "required": true,
+          "example": "PRJ-0412"
+        },
+        {
+          "name": "name",
+          "label": "Project name",
+          "definition": "Working name of the project.",
+          "type": "string",
+          "required": true,
+          "example": "Yuzu Zero 330"
+        },
+        {
+          "name": "current_gate",
+          "label": "Current gate",
+          "definition": "Gate the project is working towards.",
+          "type": "enum",
+          "required": true,
+          "allowed_values": [
+            "G0",
+            "G1",
+            "G2",
+            "G3",
+            "G4",
+            "G5"
+          ],
+          "example": "G2"
+        },
+        {
+          "name": "rag",
+          "label": "RAG status",
+          "definition": "Overall project status.",
+          "type": "enum",
+          "required": true,
+          "allowed_values": [
+            "Green",
+            "Amber",
+            "Red"
+          ],
+          "example": "Amber"
+        },
+        {
+          "name": "npv_baseline",
+          "label": "NPV baseline (G2)",
+          "definition": "Approved NPV locked at G2.",
+          "type": "currency",
+          "required": false,
+          "format": "EUR #,##0",
+          "example": "EUR 4,200,000 (illustrative)"
+        },
+        {
+          "name": "y3_volume_baseline",
+          "label": "Year-3 volume baseline (G2)",
+          "definition": "Approved Year-3 volume locked at G2.",
+          "type": "integer",
+          "required": false,
+          "example": "1,850,000 cases (illustrative)"
+        },
+        {
+          "name": "sop_version",
+          "label": "SOP version",
+          "definition": "Operative SOP version of the submitting OpCo.",
+          "type": "enum",
+          "required": true,
+          "allowed_values": [
+            "v3.2",
+            "v3.1",
+            "v2.x"
+          ],
+          "example": "v3.2"
+        }
+      ]
+    },
+    {
+      "id": "GATE",
+      "name": "Gate request",
+      "definition": "A request for an ISC slot and the gate pack prepared for it.",
+      "owner": "PM-I; ISC secretariat",
+      "system_of_record": "Innovation Tracker; gate folders on the shared drive",
+      "regulatory_class": "Business Confidential",
+      "retention": "10 years (assumed)",
+      "fields": [
+        {
+          "name": "request_id",
+          "label": "Gate request ID",
+          "definition": "Unique ID of the slot request.",
+          "type": "id",
+          "required": true,
+          "example": "GR-2026-029"
+        },
+        {
+          "name": "gate",
+          "label": "Gate",
+          "definition": "Gate decision sought.",
+          "type": "enum",
+          "required": true,
+          "allowed_values": [
+            "G0",
+            "G1",
+            "G2",
+            "G3",
+            "G4",
+            "G5"
+          ],
+          "example": "G2"
+        },
+        {
+          "name": "isc_meeting_date",
+          "label": "ISC meeting date",
+          "definition": "Date of the allocated ISC meeting.",
+          "type": "date",
+          "required": false,
+          "example": "2027-01-21"
+        },
+        {
+          "name": "slot_status",
+          "label": "Slot status",
+          "definition": "Result of slot allocation.",
+          "type": "enum",
+          "required": false,
+          "allowed_values": [
+            "Allocated",
+            "Deferred to next month"
+          ]
+        },
+        {
+          "name": "pack_slide_count",
+          "label": "Main pack slides",
+          "definition": "Slides in the main pack; limit is 15.",
+          "type": "integer",
+          "required": false,
+          "validation": "<= 15",
+          "example": "14"
+        },
+        {
+          "name": "template_version",
+          "label": "Template version",
+          "definition": "v3.2 applies to G0-G2, v2.7 to G3-G5.",
+          "type": "enum",
+          "required": false,
+          "allowed_values": [
+            "v3.2",
+            "v2.7"
+          ]
+        },
+        {
+          "name": "signoffs_received",
+          "label": "Functional sign-offs",
+          "definition": "Count of the seven required functional sign-offs.",
+          "type": "integer",
+          "required": false,
+          "validation": "must equal 7",
+          "example": "7"
+        },
+        {
+          "name": "cogs_variance_pct",
+          "label": "COGS variance",
+          "definition": "CK11n standard cost vs business case COGS; flag above 5%.",
+          "type": "percentage",
+          "required": false,
+          "format": "0.0%",
+          "example": "3.2%"
+        },
+        {
+          "name": "forecast_variance_pct",
+          "label": "Forecast variance",
+          "definition": "LOC-PM launch forecast vs G2 volumes; flag above 15%.",
+          "type": "percentage",
+          "required": false,
+          "format": "0.0%",
+          "example": "6.5%"
+        },
+        {
+          "name": "spend_variance_pct",
+          "label": "Spend variance",
+          "definition": "Internal order actuals vs approved budget; flag above 10%.",
+          "type": "percentage",
+          "required": false,
+          "format": "0.0%",
+          "example": "4.1%"
+        },
+        {
+          "name": "hold_reasons",
+          "label": "Hold reasons",
+          "definition": "Rule violations that block release to ISC.",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "narrative_draft",
+          "label": "Narrative draft",
+          "definition": "Agent-drafted gate narrative with inline citations.",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "citation_coverage_pct",
+          "label": "Citation coverage",
+          "definition": "Share of factual claims mapped to a source document.",
+          "type": "percentage",
+          "required": false,
+          "format": "0.0%",
+          "example": "98.4%"
+        },
+        {
+          "name": "reviewer_comment",
+          "label": "Reviewer comment",
+          "definition": "Free-text comment captured with a review decision.",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "pack_status",
+          "label": "Pack status",
+          "definition": "State of the gate pack.",
+          "type": "enum",
+          "required": false,
+          "allowed_values": [
+            "Draft",
+            "PM-I approved",
+            "Category VP reviewed",
+            "Released to ISC"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "REG",
+      "name": "Regulatory finding",
+      "definition": "A potential regulatory showstopper found by the pre-screen for one launch country. Never a clearance.",
+      "owner": "Regulatory Affairs Specialist (RA)",
+      "system_of_record": "RA tracker; country rules library",
+      "regulatory_class": "Regulatory Record",
+      "retention": "Market life plus 10 years (assumed)",
+      "fields": [
+        {
+          "name": "finding_id",
+          "label": "Finding ID",
+          "definition": "Unique ID of the finding.",
+          "type": "id",
+          "required": true,
+          "example": "RF-0412-DE-03"
+        },
+        {
+          "name": "country",
+          "label": "Launch country",
+          "definition": "ISO country the rule applies to.",
+          "type": "string",
+          "required": true,
+          "example": "Saudi Arabia"
+        },
+        {
+          "name": "rule_id",
+          "label": "Rule ID",
+          "definition": "ID of the rules-library entry cited, with version.",
+          "type": "string",
+          "required": true,
+          "example": "GCC-CAF-004 v2026.1"
+        },
+        {
+          "name": "parameter",
+          "label": "Parameter",
+          "definition": "The regulated parameter.",
+          "type": "string",
+          "required": true,
+          "example": "Caffeine"
+        },
+        {
+          "name": "limit",
+          "label": "Limit",
+          "definition": "Permitted limit from the rules library.",
+          "type": "string",
+          "required": true,
+          "example": "150 mg/L"
+        },
+        {
+          "name": "observed",
+          "label": "Observed value",
+          "definition": "Value in the recipe, claim or label copy.",
+          "type": "string",
+          "required": true,
+          "example": "165 mg/L"
+        },
+        {
+          "name": "severity",
+          "label": "Severity",
+          "definition": "Severity assigned by the pre-screen.",
+          "type": "enum",
+          "required": true,
+          "allowed_values": [
+            "Showstopper",
+            "Warning",
+            "Info"
+          ],
+          "example": "Showstopper"
+        },
+        {
+          "name": "ra_disposition",
+          "label": "RA disposition",
+          "definition": "Decision of the country RA Specialist. Only RA can clear.",
+          "type": "enum",
+          "required": true,
+          "allowed_values": [
+            "Pending",
+            "Cleared",
+            "Rejected",
+            "Escalated"
+          ],
+          "example": "Pending"
+        },
+        {
+          "name": "regulatory_reference",
+          "label": "Regulatory reference",
+          "definition": "Mandatory when RA dismisses an agent flag.",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "checklist_version",
+          "label": "Checklist version",
+          "definition": "Version of the RA handbook country checklist used.",
+          "type": "string",
+          "required": true,
+          "example": "EMEA 2026.1"
+        }
+      ]
+    },
+    {
+      "id": "DEC",
+      "name": "Gate decision",
+      "definition": "The ISC decision recorded for a gate.",
+      "owner": "PM-I; ISC chair",
+      "system_of_record": "Innovation Tracker; gate folder",
+      "regulatory_class": "Business Confidential",
+      "retention": "10 years (assumed)",
+      "fields": [
+        {
+          "name": "project_code",
+          "label": "Project code",
+          "definition": "Project the decision applies to.",
+          "type": "id",
+          "required": true,
+          "example": "PRJ-0412"
+        },
+        {
+          "name": "gate",
+          "label": "Gate",
+          "definition": "Gate decided.",
+          "type": "enum",
+          "required": true,
+          "allowed_values": [
+            "G0",
+            "G1",
+            "G2",
+            "G3",
+            "G4",
+            "G5"
+          ]
+        },
+        {
+          "name": "decision",
+          "label": "Decision",
+          "definition": "ISC outcome.",
+          "type": "enum",
+          "required": true,
+          "allowed_values": [
+            "Go",
+            "Go with conditions",
+            "Recycle",
+            "Kill"
+          ]
+        },
+        {
+          "name": "conditions",
+          "label": "Conditions",
+          "definition": "Conditions attached to the decision.",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "decided_on",
+          "label": "Decision date",
+          "definition": "Date of the ISC decision.",
+          "type": "date",
+          "required": true
+        },
+        {
+          "name": "filed_path",
+          "label": "Filed record path",
+          "definition": "Gate folder path where pack, checklist and minutes are filed.",
+          "type": "url",
+          "required": false,
+          "example": "\\\\drk-fs01\\Innovation\\Projects\\PRJ-0412\\Gates\\G2"
+        }
+      ]
+    },
+    {
+      "id": "G5",
+      "name": "Post-launch review",
+      "definition": "The G5 review comparing post-launch actuals with the G2 baseline.",
+      "owner": "PM-I; BM; FIN",
+      "system_of_record": "Innovation Tracker; SAP; LIMS; Nielsen/Circana extracts",
+      "regulatory_class": "Financial, Business Confidential",
+      "retention": "7 years (assumed)",
+      "fields": [
+        {
+          "name": "review_id",
+          "label": "Review ID",
+          "definition": "Unique ID of the review.",
+          "type": "id",
+          "required": true,
+          "example": "G5-0311"
+        },
+        {
+          "name": "npv_actual",
+          "label": "NPV actual",
+          "definition": "Actual NPV to date.",
+          "type": "currency",
+          "required": true,
+          "format": "EUR #,##0",
+          "example": "EUR 3,700,000 (illustrative)"
+        },
+        {
+          "name": "npv_variance_pct",
+          "label": "NPV variance",
+          "definition": "Actual vs G2 baseline NPV.",
+          "type": "percentage",
+          "required": true,
+          "format": "0.0%",
+          "example": "-11.9%"
+        },
+        {
+          "name": "volume_actual",
+          "label": "Volume actual",
+          "definition": "Actual volume in the review window.",
+          "type": "integer",
+          "required": true,
+          "example": "1,920,000 cases (illustrative)"
+        },
+        {
+          "name": "volume_variance_pct",
+          "label": "Volume variance",
+          "definition": "Actual vs G2 Year-3 baseline.",
+          "type": "percentage",
+          "required": true,
+          "format": "0.0%",
+          "example": "3.8%"
+        },
+        {
+          "name": "findings",
+          "label": "Review findings",
+          "definition": "Agent-drafted findings with cited data cells.",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "recommendation",
+          "label": "Recommendation",
+          "definition": "Agent-drafted recommendation; the ISC decides.",
+          "type": "enum",
+          "required": true,
+          "allowed_values": [
+            "Continue",
+            "Renovate",
+            "Retire"
+          ]
+        },
+        {
+          "name": "confidence",
+          "label": "Synthesis confidence",
+          "definition": "Agent confidence; below 0.75 returns findings without a recommendation.",
+          "type": "decimal",
+          "required": true,
+          "format": "0.00",
+          "example": "0.82"
+        },
+        {
+          "name": "review_status",
+          "label": "Review status",
+          "definition": "State of the review.",
+          "type": "enum",
+          "required": false,
+          "allowed_values": [
+            "Draft",
+            "Approved for ISC",
+            "Rejected"
+          ]
+        }
+      ]
+    }
+  ],
+  "integrations": [
+    {
+      "id": "INT_REG",
+      "name": "Register idea submission",
+      "kind": "deterministic",
+      "system": "Idea Box (Microsoft Forms), Idea Log",
+      "operation": "TOL7 register_idea",
+      "pattern": "event",
+      "protocol": "HTTPS/JSON",
+      "direction": "write",
+      "auth": "OAuth 2.0 service principal via MCP Gateway (assumed)",
+      "latency": "< 1 minute",
+      "request": [
+        {
+          "field": "form.title",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "IDEA.title"
+        },
+        {
+          "field": "form.target_consumer",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "IDEA.target_consumer"
+        }
+      ],
+      "response": [
+        {
+          "field": "idea_id",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "IDEA.idea_id"
+        },
+        {
+          "field": "status",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "IDEA.status"
+        }
+      ],
+      "idempotency": "idempotency_key = form response ID",
+      "constraints": "Form accepts no attachments; emailed attachments are linked to the idea ID.",
+      "errors": [
+        {
+          "code": "LOCK_CONFLICT",
+          "detection": "Tracker or Idea Log single-editor lock",
+          "response": "Queue and retry with backoff",
+          "fallback": "PM-I logs the idea using the reserved ID block"
+        }
+      ]
+    },
+    {
+      "id": "INT_DUP",
+      "name": "Detect duplicate and related ideas",
+      "kind": "agentic",
+      "system": "Innovation Evidence Library (vector index)",
+      "operation": "TOL2 search over Idea Log, Tracker and Archive",
+      "pattern": "mcp_tool",
+      "protocol": "MCP over HTTPS",
+      "direction": "read",
+      "auth": "Service account via MCP Gateway (assumed)",
+      "latency": "p95 < 20 s",
+      "request": [
+        {
+          "field": "idea_id",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "IDEA.idea_id"
+        }
+      ],
+      "response": [
+        {
+          "field": "matches[].matched_id",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "DUP.matched_id"
+        },
+        {
+          "field": "matches[].similarity",
+          "type": "decimal",
+          "required": false,
+          "description": "",
+          "ref": "DUP.similarity"
+        },
+        {
+          "field": "matches[].relation",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "DUP.relation"
+        },
+        {
+          "field": "matches[].rationale",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "DUP.rationale"
+        },
+        {
+          "field": "confidence",
+          "type": "decimal",
+          "required": false,
+          "description": "",
+          "ref": "DUP.confidence"
+        }
+      ],
+      "mcp_tool": "TOL2 Search Innovation Evidence Library",
+      "fallback": "Keyword search on flavour, format and benefit; PM-I checks manually within the weekly batch",
+      "errors": [
+        {
+          "code": "MODEL_TIMEOUT",
+          "detection": "Latency over 30 s",
+          "response": "Retry 3 times (2 s, 8 s, 30 s), then keyword search",
+          "fallback": "PM-I manual duplicate check"
+        },
+        {
+          "code": "LOW_CONFIDENCE",
+          "detection": "confidence < 0.70",
+          "response": "Mark Needs PM-I review with top-5 matches, no label",
+          "fallback": "PM-I decides within the SLA"
+        }
+      ]
+    },
+    {
+      "id": "INT_DUPDEC",
+      "name": "Post PM-I duplicate ruling",
+      "kind": "deterministic",
+      "system": "Innovation Tracker",
+      "operation": "TOL7 update_status",
+      "pattern": "rest_api",
+      "protocol": "HTTPS/JSON",
+      "direction": "write",
+      "auth": "OAuth 2.0 service principal via MCP Gateway (assumed)",
+      "latency": "< 30 s",
+      "request": [
+        {
+          "field": "link_id",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "DUP.link_id"
+        },
+        {
+          "field": "decision",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "DUP.decision"
+        },
+        {
+          "field": "override_reason",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "DUP.override_reason"
+        }
+      ],
+      "response": [
+        {
+          "field": "success",
+          "type": "string",
+          "required": false,
+          "description": ""
+        }
+      ],
+      "idempotency": "idempotency_key = link_id + decision",
+      "constraints": "Overrides feed the ATS2 eval set."
+    },
+    {
+      "id": "INT_SCORE",
+      "name": "Calculate weighted screening score",
+      "kind": "deterministic",
+      "system": "Rule engine",
+      "operation": "TOL4 calc_type=screening",
+      "pattern": "mcp_tool",
+      "protocol": "MCP over HTTPS",
+      "direction": "read",
+      "auth": "Service account via MCP Gateway (assumed)",
+      "latency": "< 2 s",
+      "request": [
+        {
+          "field": "idea_id",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "IDEA.idea_id"
+        },
+        {
+          "field": "scores",
+          "type": "string",
+          "required": false,
+          "description": ""
+        }
+      ],
+      "response": [
+        {
+          "field": "result",
+          "type": "decimal",
+          "required": false,
+          "description": "",
+          "ref": "IDEA.weighted_score"
+        },
+        {
+          "field": "breach",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "field": "review_date",
+          "type": "date",
+          "required": false,
+          "description": "",
+          "ref": "IDEA.review_date"
+        }
+      ],
+      "constraints": "Weight-matrix version is returned in calc_trace."
+    },
+    {
+      "id": "INT_IDEAS",
+      "name": "Retrieve ideas for the screening agenda",
+      "kind": "deterministic",
+      "system": "Idea Log",
+      "operation": "TOL1 record_type=idea",
+      "pattern": "rest_api",
+      "protocol": "HTTPS/JSON",
+      "direction": "read",
+      "auth": "OAuth 2.0 service principal via MCP Gateway (assumed)",
+      "latency": "< 30 s",
+      "request": [
+        {
+          "field": "status_filter",
+          "type": "string",
+          "required": false,
+          "description": ""
+        }
+      ],
+      "response": [
+        {
+          "field": "records[].idea_id",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "IDEA.idea_id"
+        },
+        {
+          "field": "records[].title",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "IDEA.title"
+        },
+        {
+          "field": "records[].status",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "IDEA.status"
+        }
+      ]
+    },
+    {
+      "id": "INT_VOTE",
+      "name": "Record screening vote",
+      "kind": "deterministic",
+      "system": "Idea Log; Innovation Tracker",
+      "operation": "TOL7 update_status",
+      "pattern": "rest_api",
+      "protocol": "HTTPS/JSON",
+      "direction": "write",
+      "auth": "OAuth 2.0 service principal via MCP Gateway (assumed)",
+      "latency": "< 30 s",
+      "request": [
+        {
+          "field": "idea_id",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "IDEA.idea_id"
+        },
+        {
+          "field": "status",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "IDEA.status"
+        },
+        {
+          "field": "review_date",
+          "type": "date",
+          "required": false,
+          "description": "",
+          "ref": "IDEA.review_date"
+        }
+      ],
+      "response": [
+        {
+          "field": "success",
+          "type": "string",
+          "required": false,
+          "description": ""
+        }
+      ],
+      "idempotency": "idempotency_key = idea_id + meeting date",
+      "constraints": "Sends the standard outcome text to the submitter."
+    },
+    {
+      "id": "INT_SLOT",
+      "name": "Validate gate request and allocate ISC slot",
+      "kind": "deterministic",
+      "system": "ISC agenda register; Outlook calendar",
+      "operation": "TOL3 rule_set=slot",
+      "pattern": "mcp_tool",
+      "protocol": "MCP over HTTPS",
+      "direction": "read",
+      "auth": "Service account via MCP Gateway (assumed)",
+      "latency": "< 5 s",
+      "request": [
+        {
+          "field": "project_code",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "PROJ.project_code"
+        },
+        {
+          "field": "gate",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "GATE.gate"
+        }
+      ],
+      "response": [
+        {
+          "field": "pass",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "field": "slot_status",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "GATE.slot_status"
+        },
+        {
+          "field": "isc_meeting_date",
+          "type": "date",
+          "required": false,
+          "description": "",
+          "ref": "GATE.isc_meeting_date"
+        },
+        {
+          "field": "sop_version_applied",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "PROJ.sop_version"
+        },
+        {
+          "field": "violations[].description",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "GATE.hold_reasons"
+        }
+      ],
+      "constraints": "Maximum 6 gates per meeting; request at least 3 weeks before."
+    },
+    {
+      "id": "INT_PACK",
+      "name": "Check pack completeness and SOP version",
+      "kind": "deterministic",
+      "system": "Gate folder (shared drive); SOP version register",
+      "operation": "TOL3 rule_set=pack",
+      "pattern": "mcp_tool",
+      "protocol": "MCP over HTTPS",
+      "direction": "read",
+      "auth": "Service account via MCP Gateway (assumed)",
+      "latency": "< 10 s",
+      "request": [
+        {
+          "field": "project_code",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "PROJ.project_code"
+        },
+        {
+          "field": "gate",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "GATE.gate"
+        }
+      ],
+      "response": [
+        {
+          "field": "pack_slide_count",
+          "type": "integer",
+          "required": false,
+          "description": "",
+          "ref": "GATE.pack_slide_count"
+        },
+        {
+          "field": "template_version",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "GATE.template_version"
+        },
+        {
+          "field": "signoffs_received",
+          "type": "integer",
+          "required": false,
+          "description": "",
+          "ref": "GATE.signoffs_received"
+        },
+        {
+          "field": "sop_version_applied",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "PROJ.sop_version"
+        }
+      ]
+    },
+    {
+      "id": "INT_VAR",
+      "name": "Reconcile business case variances",
+      "kind": "deterministic",
+      "system": "SAP S/4HANA (ECC in 4 OpCos); SAP IBP; business case",
+      "operation": "TOL4 and TOL5 variance tests",
+      "pattern": "rest_api",
+      "protocol": "HTTPS/JSON",
+      "direction": "read",
+      "auth": "Service account via MCP Gateway (assumed)",
+      "latency": "< 5 s reads; T+1 actuals",
+      "request": [
+        {
+          "field": "project_code",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "PROJ.project_code"
+        }
+      ],
+      "response": [
+        {
+          "field": "cogs_variance_pct",
+          "type": "percentage",
+          "required": false,
+          "description": "",
+          "ref": "GATE.cogs_variance_pct"
+        },
+        {
+          "field": "forecast_variance_pct",
+          "type": "percentage",
+          "required": false,
+          "description": "",
+          "ref": "GATE.forecast_variance_pct"
+        },
+        {
+          "field": "spend_variance_pct",
+          "type": "percentage",
+          "required": false,
+          "description": "",
+          "ref": "GATE.spend_variance_pct"
+        }
+      ],
+      "constraints": "ECC OpCos need a separate connector and field mapping.",
+      "errors": [
+        {
+          "code": "SAP_EXTRACT_INCOMPLETE",
+          "detection": "Record count below 99.5%",
+          "response": "Halt; no partial variance report",
+          "fallback": "Innovation Finance Controller runs the manual comparison"
+        }
+      ]
+    },
+    {
+      "id": "INT_REGSCR",
+      "name": "Pre-screen recipe, claims and label copy",
+      "kind": "agentic",
+      "system": "Country rules library; RA tracker; PLM Lite (Specright)",
+      "operation": "TOL6 retrieval, then LLM interpretation per country",
+      "pattern": "mcp_tool",
+      "protocol": "MCP over HTTPS",
+      "direction": "read",
+      "auth": "Service account with RA-scoped access (assumed)",
+      "latency": "< 15 min per country",
+      "request": [
+        {
+          "field": "project_code",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "PROJ.project_code"
+        },
+        {
+          "field": "countries[]",
+          "type": "string",
+          "required": false,
+          "description": ""
+        }
+      ],
+      "response": [
+        {
+          "field": "findings[].country",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "REG.country"
+        },
+        {
+          "field": "findings[].rule_id",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "REG.rule_id"
+        },
+        {
+          "field": "findings[].parameter",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "REG.parameter"
+        },
+        {
+          "field": "findings[].limit",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "REG.limit"
+        },
+        {
+          "field": "findings[].observed",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "REG.observed"
+        },
+        {
+          "field": "findings[].severity",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "REG.severity"
+        },
+        {
+          "field": "checklist_version",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "REG.checklist_version"
+        }
+      ],
+      "mcp_tool": "TOL6 Retrieve Regulatory Rule and Specification Set",
+      "fallback": "Mark not screened; RA performs the full manual pre-screen",
+      "constraints": "Output schema forbids cleared, approved or compliant verdicts. Numeric limits are checked deterministically first.",
+      "errors": [
+        {
+          "code": "COUNTRY_NOT_IN_LIBRARY",
+          "detection": "Country absent from rules library",
+          "response": "Flag not screenable and open RA case",
+          "fallback": "RA manual pre-screen"
+        }
+      ]
+    },
+    {
+      "id": "INT_RACASE",
+      "name": "Post RA disposition",
+      "kind": "deterministic",
+      "system": "Control Tower HITL queue; RA tracker",
+      "operation": "TOL7 create_task and record disposition",
+      "pattern": "rest_api",
+      "protocol": "HTTPS/JSON",
+      "direction": "write",
+      "auth": "OAuth 2.0 service principal via MCP Gateway (assumed)",
+      "latency": "< 30 s",
+      "request": [
+        {
+          "field": "finding_id",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "REG.finding_id"
+        },
+        {
+          "field": "ra_disposition",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "REG.ra_disposition"
+        },
+        {
+          "field": "regulatory_reference",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "REG.regulatory_reference"
+        }
+      ],
+      "response": [
+        {
+          "field": "record_ref",
+          "type": "string",
+          "required": false,
+          "description": ""
+        }
+      ],
+      "constraints": "No default clearance on SLA breach; the hold persists."
+    },
+    {
+      "id": "INT_DRAFT",
+      "name": "Draft gate narrative",
+      "kind": "agentic",
+      "system": "Gate evidence documents; Innovation Tracker",
+      "operation": "TOL2 retrieval, then cited drafting",
+      "pattern": "mcp_tool",
+      "protocol": "MCP over HTTPS",
+      "direction": "read",
+      "auth": "Service account via MCP Gateway (assumed)",
+      "latency": "p95 < 60 s per section",
+      "request": [
+        {
+          "field": "project_code",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "PROJ.project_code"
+        },
+        {
+          "field": "gate",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "GATE.gate"
+        }
+      ],
+      "response": [
+        {
+          "field": "narrative_draft",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "GATE.narrative_draft"
+        },
+        {
+          "field": "citation_coverage_pct",
+          "type": "percentage",
+          "required": false,
+          "description": "",
+          "ref": "GATE.citation_coverage_pct"
+        }
+      ],
+      "mcp_tool": "TOL2 Search Innovation Evidence Library",
+      "fallback": "Section-by-section drafting with a reduced evidence bundle; then PM-I drafts from the template",
+      "constraints": "Numeric-figure lock: every number must match the source exactly."
+    },
+    {
+      "id": "INT_PACKAPPR",
+      "name": "Post review approval",
+      "kind": "deterministic",
+      "system": "Innovation Tracker",
+      "operation": "TOL7 update_status",
+      "pattern": "rest_api",
+      "protocol": "HTTPS/JSON",
+      "direction": "write",
+      "auth": "OAuth 2.0 service principal via MCP Gateway (assumed)",
+      "latency": "< 30 s",
+      "request": [
+        {
+          "field": "request_id",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "GATE.request_id"
+        },
+        {
+          "field": "pack_status",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "GATE.pack_status"
+        },
+        {
+          "field": "review_id",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "G5.review_id"
+        },
+        {
+          "field": "review_status",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "G5.review_status"
+        },
+        {
+          "field": "reviewer_comment",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "GATE.reviewer_comment"
+        }
+      ],
+      "response": [
+        {
+          "field": "success",
+          "type": "string",
+          "required": false,
+          "description": ""
+        }
+      ],
+      "idempotency": "idempotency_key = request_id + status",
+      "constraints": "A figure edit re-runs pack validation and invalidates affected sign-offs (SOP 1.3.4)."
+    },
+    {
+      "id": "INT_HOLD",
+      "name": "Enforce gate prerequisites and release holds",
+      "kind": "deterministic",
+      "system": "Rule engine; RA tracker; GS1 portal",
+      "operation": "TOL3 rule_set=release_hold",
+      "pattern": "mcp_tool",
+      "protocol": "MCP over HTTPS",
+      "direction": "read",
+      "auth": "Service account via MCP Gateway (assumed)",
+      "latency": "< 5 s",
+      "request": [
+        {
+          "field": "project_code",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "PROJ.project_code"
+        },
+        {
+          "field": "gate",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "GATE.gate"
+        }
+      ],
+      "response": [
+        {
+          "field": "pass",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "field": "violations[].description",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "GATE.hold_reasons"
+        }
+      ],
+      "constraints": "Seven sign-offs, template version, RA disposition, funding route, all OpCo G3 passes, G4 at least 8 weeks before first shipment."
+    },
+    {
+      "id": "INT_DECIDE",
+      "name": "Record gate decision and update portfolio",
+      "kind": "deterministic",
+      "system": "Innovation Tracker; gate folder; DocuSign (G2)",
+      "operation": "TOL7 record_decision, file_record",
+      "pattern": "rest_api",
+      "protocol": "HTTPS/JSON",
+      "direction": "write",
+      "auth": "OAuth 2.0 service principal via MCP Gateway (assumed)",
+      "latency": "< 30 s",
+      "request": [
+        {
+          "field": "project_code",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "DEC.project_code"
+        },
+        {
+          "field": "gate",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "DEC.gate"
+        },
+        {
+          "field": "decision",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "DEC.decision"
+        },
+        {
+          "field": "conditions",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "DEC.conditions"
+        },
+        {
+          "field": "decided_on",
+          "type": "date",
+          "required": false,
+          "description": "",
+          "ref": "DEC.decided_on"
+        }
+      ],
+      "response": [
+        {
+          "field": "filed_path",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "DEC.filed_path"
+        },
+        {
+          "field": "record_ref",
+          "type": "string",
+          "required": false,
+          "description": ""
+        }
+      ],
+      "idempotency": "idempotency_key = project_code + gate + decided_on",
+      "constraints": "Kill triggers a budget-release notification to the Innovation Finance Controller."
+    },
+    {
+      "id": "INT_G5DATA",
+      "name": "Assemble G5 post-launch dataset",
+      "kind": "deterministic",
+      "system": "Innovation Tracker; SAP; LIMS; Nielsen/Circana extracts",
+      "operation": "TOL4 calc_type=g5_variance with TOL5",
+      "pattern": "batch",
+      "protocol": "HTTPS/JSON and file drop",
+      "direction": "read",
+      "auth": "Service account via MCP Gateway (assumed)",
+      "latency": "T+1 actuals; monthly market data",
+      "request": [
+        {
+          "field": "project_code",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "PROJ.project_code"
+        }
+      ],
+      "response": [
+        {
+          "field": "npv_baseline",
+          "type": "currency",
+          "required": false,
+          "description": "",
+          "ref": "PROJ.npv_baseline"
+        },
+        {
+          "field": "npv_actual",
+          "type": "currency",
+          "required": false,
+          "description": "",
+          "ref": "G5.npv_actual"
+        },
+        {
+          "field": "npv_variance_pct",
+          "type": "percentage",
+          "required": false,
+          "description": "",
+          "ref": "G5.npv_variance_pct"
+        },
+        {
+          "field": "y3_volume_baseline",
+          "type": "integer",
+          "required": false,
+          "description": "",
+          "ref": "PROJ.y3_volume_baseline"
+        },
+        {
+          "field": "volume_actual",
+          "type": "integer",
+          "required": false,
+          "description": "",
+          "ref": "G5.volume_actual"
+        },
+        {
+          "field": "volume_variance_pct",
+          "type": "percentage",
+          "required": false,
+          "description": "",
+          "ref": "G5.volume_variance_pct"
+        }
+      ],
+      "constraints": "Nielsen/Circana use must respect per-OpCo licence terms. G5 timing rule is an assumption."
+    },
+    {
+      "id": "INT_SYNTH",
+      "name": "Synthesise post-launch findings",
+      "kind": "agentic",
+      "system": "Evidence library; G5 dataset",
+      "operation": "TOL2 retrieval, then cited synthesis",
+      "pattern": "mcp_tool",
+      "protocol": "MCP over HTTPS",
+      "direction": "read",
+      "auth": "Service account via MCP Gateway (assumed)",
+      "latency": "minutes",
+      "request": [
+        {
+          "field": "project_code",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "PROJ.project_code"
+        }
+      ],
+      "response": [
+        {
+          "field": "findings",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "G5.findings"
+        },
+        {
+          "field": "recommendation",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "ref": "G5.recommendation"
+        },
+        {
+          "field": "confidence",
+          "type": "decimal",
+          "required": false,
+          "description": "",
+          "ref": "G5.confidence"
+        }
+      ],
+      "mcp_tool": "TOL2 Search Innovation Evidence Library",
+      "fallback": "PM-I and Innovation Finance Controller author the recommendation",
+      "constraints": "Retire recommendations are tagged for ISC decision only."
+    }
+  ],
+  "steps": [
+    {
+      "id": "S00",
+      "name": "Idea submitted",
+      "type": "start",
+      "lane": "eng",
+      "description": "Idea Box form response or Brand Manager email received.",
+      "next": [
+        {
+          "to": "S01"
+        }
+      ]
+    },
+    {
+      "id": "S01",
+      "name": "ATS1 Register idea submission",
+      "type": "deterministic",
+      "lane": "eng",
+      "description": "Registers the idea in the Idea Log with the next free ID.",
+      "next": [
+        {
+          "to": "S02"
+        }
+      ],
+      "zone": "GREEN",
+      "rule": "All 12 Idea Box fields present; next IDX-YYYY-nnn ID assigned; row written to the Idea Log.",
+      "integration_ids": [
+        "INT_REG"
+      ],
+      "reads": [
+        "IDEA.title"
+      ],
+      "writes": [
+        "IDEA.idea_id",
+        "IDEA.status"
+      ]
+    },
+    {
+      "id": "S02",
+      "name": "ATS2 Detect duplicate and related ideas",
+      "type": "agentic",
+      "lane": "agn1",
+      "description": "Proposes Duplicate, Related or Variant links against the Idea Log, Tracker and Archive.",
+      "next": [
+        {
+          "to": "S03"
+        }
+      ],
+      "zone": "AMBER",
+      "agent": "AGN1",
+      "integration_ids": [
+        "INT_DUP"
+      ],
+      "input_contract": "Idea record (structured JSON, 12 answers, submitter masked), taxonomy, top-15 candidates, up to 5 prior PM-I rulings.",
+      "output_contract": "Relation (Duplicate, Related, Variant, None), field-level evidence, similarity, confidence 0-1.",
+      "fallback": "Keyword search on flavour, format and benefit; PM-I checks manually",
+      "reads": [
+        "IDEA.title"
+      ],
+      "writes": [
+        "DUP.relation",
+        "DUP.similarity",
+        "DUP.confidence",
+        "DUP.rationale"
+      ]
+    },
+    {
+      "id": "S03",
+      "name": "Confirm duplicate and related links",
+      "type": "human",
+      "lane": "pmi",
+      "description": "PM-I approves, rejects, modifies or escalates each proposed link.",
+      "next": [
+        {
+          "to": "S04"
+        }
+      ],
+      "screen_ids": [
+        "SCR_DUP"
+      ],
+      "sla": "3 working days, before the Friday Idea Log close",
+      "integration_ids": [
+        "INT_DUPDEC"
+      ],
+      "reads": [
+        "DUP.relation",
+        "DUP.rationale"
+      ],
+      "writes": [
+        "DUP.decision",
+        "DUP.override_reason"
+      ],
+      "zone": "AMBER"
+    },
+    {
+      "id": "S04",
+      "name": "ATS3 Calculate weighted screening score",
+      "type": "deterministic",
+      "lane": "eng",
+      "description": "Applies the fixed matrix weights to the eight criteria scores.",
+      "next": [
+        {
+          "to": "GW1"
+        }
+      ],
+      "zone": "GREEN",
+      "rule": "Weighted sum of eight criteria scored 1-10; score above 60 qualifies for the monthly Idea Screening meeting; Parked ideas get a review date.",
+      "integration_ids": [
+        "INT_SCORE"
+      ],
+      "writes": [
+        "IDEA.weighted_score",
+        "IDEA.review_date"
+      ]
+    },
+    {
+      "id": "GW1",
+      "name": "Score above 60?",
+      "type": "gateway",
+      "lane": "eng",
+      "description": "",
+      "next": [
+        {
+          "to": "S05",
+          "condition": "Score above 60"
+        },
+        {
+          "to": "E1",
+          "condition": "Score 60 or below"
+        }
+      ],
+      "gateway": "xor"
+    },
+    {
+      "id": "S05",
+      "name": "Idea Screening vote",
+      "type": "human",
+      "lane": "pmi",
+      "description": "Monthly 90-minute meeting: attendees vote proceed, park or reject.",
+      "next": [
+        {
+          "to": "GW2"
+        }
+      ],
+      "screen_ids": [
+        "SCR_SCREEN"
+      ],
+      "sla": "Monthly session; outcome sent to the submitter at once",
+      "integration_ids": [
+        "INT_IDEAS",
+        "INT_VOTE"
+      ],
+      "reads": [
+        "IDEA.title",
+        "IDEA.weighted_score"
+      ],
+      "writes": [
+        "IDEA.status",
+        "IDEA.review_date"
+      ],
+      "zone": "GREEN"
+    },
+    {
+      "id": "GW2",
+      "name": "Vote outcome",
+      "type": "gateway",
+      "lane": "eng",
+      "description": "",
+      "next": [
+        {
+          "to": "S06",
+          "condition": "Proceed"
+        },
+        {
+          "to": "E1",
+          "condition": "Park or reject"
+        }
+      ],
+      "gateway": "xor"
+    },
+    {
+      "id": "S06",
+      "name": "ATS4 Validate gate request and allocate ISC slot",
+      "type": "deterministic",
+      "lane": "eng",
+      "description": "Checks lead time and slot capacity and allocates an ISC slot.",
+      "next": [
+        {
+          "to": "GW3"
+        }
+      ],
+      "zone": "GREEN",
+      "rule": "Request at least 3 weeks before the meeting; project, gate and decision sought stated; slots in request order; maximum 6 gates per meeting; overflow rolls to next month.",
+      "integration_ids": [
+        "INT_SLOT"
+      ],
+      "writes": [
+        "GATE.slot_status",
+        "GATE.isc_meeting_date"
+      ]
+    },
+    {
+      "id": "GW3",
+      "name": "Fan out gate checks",
+      "type": "gateway",
+      "lane": "eng",
+      "description": "",
+      "next": [
+        {
+          "to": "S07"
+        },
+        {
+          "to": "S08"
+        },
+        {
+          "to": "S09"
+        }
+      ],
+      "gateway": "and"
+    },
+    {
+      "id": "S07",
+      "name": "ATS5 Check pack completeness and SOP version",
+      "type": "deterministic",
+      "lane": "eng",
+      "description": "Checks template version, mandatory slides, 15-slide cap and seven sign-offs.",
+      "next": [
+        {
+          "to": "GW4"
+        }
+      ],
+      "zone": "GREEN",
+      "rule": "Template v3.2 for G0-G2 and v2.7 for G3-G5; all mandatory slides; main pack under 15 slides; seven functional sign-offs; flag OpCos on SOP v2.x.",
+      "integration_ids": [
+        "INT_PACK"
+      ],
+      "writes": [
+        "GATE.pack_slide_count",
+        "GATE.template_version",
+        "GATE.signoffs_received"
+      ]
+    },
+    {
+      "id": "S08",
+      "name": "ATS7 Reconcile business case variances",
+      "type": "deterministic",
+      "lane": "eng",
+      "description": "Runs the three SOP variance tests and routes breaches to the PM-I.",
+      "next": [
+        {
+          "to": "GW4"
+        }
+      ],
+      "zone": "GREEN",
+      "rule": "COGS variance above 5%; forecast vs G2 volume above 15%; spend vs budget above 10%.",
+      "integration_ids": [
+        "INT_VAR"
+      ],
+      "writes": [
+        "GATE.cogs_variance_pct",
+        "GATE.forecast_variance_pct",
+        "GATE.spend_variance_pct"
+      ]
+    },
+    {
+      "id": "S09",
+      "name": "ATS9 Pre-screen recipe, claims and label copy",
+      "type": "agentic",
+      "lane": "agn5",
+      "description": "Surfaces potential regulatory showstoppers per launch country. Never clears.",
+      "next": [
+        {
+          "to": "S10"
+        }
+      ],
+      "zone": "RED",
+      "agent": "AGN5",
+      "integration_ids": [
+        "INT_REGSCR"
+      ],
+      "input_contract": "Recipe, nutrition values, claims, back-of-pack copy per country, country rule pack, registration flags.",
+      "output_contract": "Findings with rule ID and version, severity, excerpt; showstopper flag. Verdict words cleared, approved, compliant are forbidden.",
+      "fallback": "Mark not screened and open an RA case",
+      "writes": [
+        "REG.rule_id",
+        "REG.severity"
+      ]
+    },
+    {
+      "id": "S10",
+      "name": "RA disposition per country",
+      "type": "human",
+      "lane": "ra",
+      "description": "Country RA Specialist records a disposition for every finding and every no-finding result.",
+      "next": [
+        {
+          "to": "GW4"
+        }
+      ],
+      "screen_ids": [
+        "SCR_RA"
+      ],
+      "sla": "Acknowledge in 2 working days; clear within 5 working days",
+      "integration_ids": [
+        "INT_RACASE"
+      ],
+      "reads": [
+        "REG.rule_id",
+        "REG.severity"
+      ],
+      "writes": [
+        "REG.ra_disposition"
+      ],
+      "zone": "RED"
+    },
+    {
+      "id": "GW4",
+      "name": "Join gate checks",
+      "type": "gateway",
+      "lane": "eng",
+      "description": "",
+      "next": [
+        {
+          "to": "S11"
+        }
+      ],
+      "gateway": "and"
+    },
+    {
+      "id": "S11",
+      "name": "ATS6 Draft gate narrative",
+      "type": "agentic",
+      "lane": "agn3",
+      "description": "Drafts the cited narrative slides for the gate pack.",
+      "next": [
+        {
+          "to": "S12"
+        }
+      ],
+      "zone": "AMBER",
+      "agent": "AGN3",
+      "integration_ids": [
+        "INT_DRAFT"
+      ],
+      "input_contract": "Gate and template contract, ATS5 result, Tracker row, verified financials, ATS7 variances, functional evidence status, prior conditions.",
+      "output_contract": "Draft sections with inline citations, evidence-gap list, confidence per section.",
+      "fallback": "Section-by-section drafting, then PM-I drafts from the template",
+      "writes": [
+        "GATE.narrative_draft",
+        "GATE.citation_coverage_pct"
+      ]
+    },
+    {
+      "id": "S12",
+      "name": "Review and approve gate pack",
+      "type": "human",
+      "lane": "pmi",
+      "description": "PM-I validates every claim against its source; Category VP pre-review follows.",
+      "next": [
+        {
+          "to": "S13"
+        }
+      ],
+      "screen_ids": [
+        "SCR_PACK"
+      ],
+      "sla": "Draft 8 working days before the gate; review done 5 working days before the meeting",
+      "integration_ids": [
+        "INT_PACKAPPR"
+      ],
+      "reads": [
+        "GATE.narrative_draft",
+        "GATE.citation_coverage_pct"
+      ],
+      "writes": [
+        "GATE.pack_status"
+      ],
+      "zone": "AMBER"
+    },
+    {
+      "id": "S13",
+      "name": "ATS10 Enforce gate prerequisites and release holds",
+      "type": "deterministic",
+      "lane": "eng",
+      "description": "Releases the project to the ISC only when every prerequisite holds.",
+      "next": [
+        {
+          "to": "S14"
+        }
+      ],
+      "zone": "GREEN",
+      "rule": "Seven sign-offs; correct template; RA disposition recorded; funding routed; all OpCo G3 passes before global G3; G4 at least 8 weeks before first shipment.",
+      "integration_ids": [
+        "INT_HOLD"
+      ],
+      "writes": [
+        "GATE.hold_reasons"
+      ]
+    },
+    {
+      "id": "S14",
+      "name": "Record ISC chair decision",
+      "type": "human",
+      "lane": "isc",
+      "description": "The ISC chair states Go, Go with conditions, Recycle or Kill; the secretariat enters it.",
+      "next": [
+        {
+          "to": "S15"
+        }
+      ],
+      "screen_ids": [
+        "SCR_DECISION"
+      ],
+      "sla": "Recorded within 2 working days",
+      "reads": [
+        "GATE.hold_reasons"
+      ],
+      "writes": [
+        "DEC.decision",
+        "DEC.conditions",
+        "DEC.decided_on"
+      ],
+      "zone": "GREEN"
+    },
+    {
+      "id": "S15",
+      "name": "ATS11 Record gate decision and update portfolio",
+      "type": "deterministic",
+      "lane": "eng",
+      "description": "Writes the decision to the Tracker, files the records and issues the action log.",
+      "next": [
+        {
+          "to": "GW5"
+        }
+      ],
+      "zone": "GREEN",
+      "rule": "Decision and conditions written to the Tracker; pack, checklist and minutes filed to the gate folder; DocuSign at G2; Kill triggers a budget-release request.",
+      "integration_ids": [
+        "INT_DECIDE"
+      ],
+      "writes": [
+        "DEC.filed_path"
+      ]
+    },
+    {
+      "id": "GW5",
+      "name": "ISC decision",
+      "type": "gateway",
+      "lane": "eng",
+      "description": "",
+      "next": [
+        {
+          "to": "S06",
+          "condition": "Recycle: return to re-entry step"
+        },
+        {
+          "to": "E2",
+          "condition": "Kill"
+        },
+        {
+          "to": "S16",
+          "condition": "Go or Go with conditions"
+        }
+      ],
+      "gateway": "xor"
+    },
+    {
+      "id": "S16",
+      "name": "ATS12 Assemble G5 post-launch dataset",
+      "type": "deterministic",
+      "lane": "eng",
+      "description": "Joins baselines locked at G2 with post-launch actuals into a variance table.",
+      "next": [
+        {
+          "to": "S17"
+        }
+      ],
+      "zone": "GREEN",
+      "rule": "G5 due date and on-time flag from the launch date; variance table of SAP volume, market data, QA data and internal order spend against G2 baselines.",
+      "integration_ids": [
+        "INT_G5DATA"
+      ],
+      "writes": [
+        "G5.npv_actual",
+        "G5.npv_variance_pct",
+        "G5.volume_actual",
+        "G5.volume_variance_pct"
+      ]
+    },
+    {
+      "id": "S17",
+      "name": "ATS13 Synthesise post-launch review findings",
+      "type": "agentic",
+      "lane": "agn6",
+      "description": "Drafts root causes, lessons and a continue, renovate or retire recommendation.",
+      "next": [
+        {
+          "to": "S18"
+        }
+      ],
+      "zone": "AMBER",
+      "agent": "AGN6",
+      "integration_ids": [
+        "INT_SYNTH"
+      ],
+      "input_contract": "G2 baseline, ATS12 dataset, launch execution record, quality evidence, 3 to 5 comparable launches.",
+      "output_contract": "Findings with a cited data cell each, recommended action, confidence.",
+      "fallback": "PM-I and Innovation Finance Controller author the recommendation",
+      "writes": [
+        "G5.findings",
+        "G5.recommendation"
+      ]
+    },
+    {
+      "id": "S18",
+      "name": "Approve post-launch review for ISC",
+      "type": "human",
+      "lane": "pmi",
+      "description": "PM-I and BM approve; the Innovation Finance Controller verifies financial variances.",
+      "next": [
+        {
+          "to": "E3"
+        }
+      ],
+      "screen_ids": [
+        "SCR_G5"
+      ],
+      "sla": "Within 5 working days of generation and before the G5 ISC slot",
+      "integration_ids": [
+        "INT_PACKAPPR"
+      ],
+      "reads": [
+        "G5.findings",
+        "G5.recommendation"
+      ],
+      "writes": [
+        "G5.review_status"
+      ],
+      "zone": "AMBER"
+    },
+    {
+      "id": "E1",
+      "name": "Idea parked or rejected",
+      "type": "end",
+      "lane": "eng",
+      "description": "Outcome text sent to the submitter; review date set for Parked ideas.",
+      "next": []
+    },
+    {
+      "id": "E2",
+      "name": "Project killed",
+      "type": "end",
+      "lane": "eng",
+      "description": "Budget-release notification sent to the Innovation Finance Controller.",
+      "next": []
+    },
+    {
+      "id": "E3",
+      "name": "Post-launch review complete",
+      "type": "end",
+      "lane": "eng",
+      "description": "Review recorded and G5 scheduled with the ISC.",
+      "next": []
+    }
+  ],
+  "screens": [
+    {
+      "id": "SCR_DUP",
+      "title": "Duplicate and related idea review",
+      "purpose": "Confirm, reject or re-link the agent-proposed matches for one new idea.",
+      "lane": "pmi",
+      "pattern": "hitl_review",
+      "url_path": "ideas/IDX-2026-041/duplicates",
+      "nav": [
+        "Ideas",
+        "Duplicate review",
+        "Idea screening",
+        "Gate pipeline",
+        "Regulatory",
+        "Gate packs",
+        "Post-launch",
+        "Reports"
+      ],
+      "active_nav": "Duplicate review",
+      "status": {
+        "text": "AMBER review",
+        "tone": "amber"
+      },
+      "notes": [
+        "Below 0.70 confidence the panel shows no label and the PM-I decides from the top-5 matches.",
+        "A rejected link needs an override reason code; it feeds the ATS2 eval set."
+      ],
+      "components": [
+        {
+          "type": "banner",
+          "text": "Idea IDX-2026-041 'Zero-sugar yuzu sparkling 330 ml can' (illustrative) has 2 possible matches. Review before the Friday Idea Log close.",
+          "tone": "amber"
+        },
+        {
+          "type": "kpis",
+          "items": [
+            {
+              "label": "Ideas awaiting review",
+              "value": "7",
+              "delta": "2 older than 2 days",
+              "tone": "amber"
+            },
+            {
+              "label": "Oldest waiting",
+              "value": "2 days",
+              "delta": "SLA 3 working days",
+              "tone": "green"
+            },
+            {
+              "label": "Override rate (rolling 20)",
+              "value": "18%",
+              "delta": "Halt threshold 30%",
+              "tone": "green"
+            },
+            {
+              "label": "Confidence on this idea",
+              "value": "0.81",
+              "delta": "Above 0.70 floor",
+              "tone": "blue"
+            }
+          ],
+          "span": 12
+        },
+        {
+          "type": "table",
+          "title": "Candidate matches",
+          "headers": [
+            "Match",
+            "Title",
+            "Status",
+            "Similarity",
+            "Proposed relation"
+          ],
+          "rows": [
+            [
+              "PRJ-0311",
+              "Yuzu Fizz 250 ml slim can",
+              {
+                "text": "Killed at G1",
+                "tone": "grey"
+              },
+              "0.83",
+              {
+                "text": "Related",
+                "tone": "amber"
+              }
+            ],
+            [
+              "IDX-2025-188",
+              "Citrus sparkling zero sugar",
+              {
+                "text": "Parked",
+                "tone": "amber"
+              },
+              "0.74",
+              {
+                "text": "Variant",
+                "tone": "blue"
+              }
+            ]
+          ],
+          "refs": [
+            "DUP.matched_id",
+            "",
+            "IDEA.status",
+            "DUP.similarity",
+            "DUP.relation"
+          ],
+          "span": 12
+        },
+        {
+          "type": "hitl_panel",
+          "agent": "AGN1 Idea Intake and Screening Agent",
+          "zone": "AMBER",
+          "confidence": "0.81",
+          "proposal": "Link IDX-2026-041 to PRJ-0311 as Related: same flavour (yuzu) and benefit (zero sugar), different pack format (330 ml can vs 250 ml slim can).",
+          "evidence": [
+            "PRJ-0311 Tracker row, Archive tab: killed at G1 for margin, not for consumer appeal.",
+            "IDX-2025-188 Idea Log row: Parked, review date 2027-02-15."
+          ],
+          "reviewer": "Innovation Project Manager (PM-I)",
+          "sla": "3 working days",
+          "override_reasons": [
+            "Different benefit",
+            "Different format",
+            "Different market",
+            "Killed for unrelated reason"
+          ],
+          "on_sla_breach": "Idea registered as distinct with flag Duplicate check pending",
+          "actions": [
+            "Escalate to BM",
+            "Reject link",
+            "Modify",
+            "Approve link"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "SCR_SCREEN",
+      "title": "Monthly Idea Screening agenda",
+      "purpose": "Run the screening meeting: ideas above 60 and the proceed, park or reject vote.",
+      "lane": "pmi",
+      "pattern": "queue",
+      "url_path": "ideas/screening/2026-12",
+      "nav": [
+        "Ideas",
+        "Duplicate review",
+        "Idea screening",
+        "Gate pipeline",
+        "Regulatory",
+        "Gate packs",
+        "Post-launch",
+        "Reports"
+      ],
+      "active_nav": "Idea screening",
+      "status": {
+        "text": "Meeting open",
+        "tone": "green"
+      },
+      "components": [
+        {
+          "type": "kpis",
+          "items": [
+            {
+              "label": "Ideas on agenda",
+              "value": "9",
+              "delta": "Score above 60",
+              "tone": "blue"
+            },
+            {
+              "label": "Highest score",
+              "value": "81.5",
+              "delta": "IDX-2026-033 (illustrative)",
+              "tone": "green"
+            },
+            {
+              "label": "Parked awaiting review date",
+              "value": "4",
+              "delta": "Gap closed by ATS3",
+              "tone": "amber"
+            }
+          ],
+          "span": 12
+        },
+        {
+          "type": "filters",
+          "items": [
+            "Brand: All",
+            "OpCo: All",
+            "Category: Sparkling"
+          ]
+        },
+        {
+          "type": "table",
+          "title": "Ideas above the 60-point threshold",
+          "headers": [
+            "Idea ID",
+            "Title",
+            "Weighted score",
+            "Status",
+            "Vote"
+          ],
+          "rows": [
+            [
+              "IDX-2026-033",
+              "Oat-based protein iced coffee",
+              "81.5",
+              {
+                "text": "Scored",
+                "tone": "green"
+              },
+              "Not yet voted"
+            ],
+            [
+              "IDX-2026-041",
+              "Zero-sugar yuzu sparkling 330 ml can",
+              "68.5",
+              {
+                "text": "Scored",
+                "tone": "green"
+              },
+              "Not yet voted"
+            ],
+            [
+              "IDX-2026-027",
+              "Hibiscus functional shot",
+              "62.0",
+              {
+                "text": "Scored",
+                "tone": "amber"
+              },
+              "Not yet voted"
+            ]
+          ],
+          "refs": [
+            "IDEA.idea_id",
+            "IDEA.title",
+            "IDEA.weighted_score",
+            "IDEA.status",
+            ""
+          ],
+          "span": 7
+        },
+        {
+          "type": "form",
+          "title": "Record vote",
+          "span": 5,
+          "fields": [
+            {
+              "label": "Idea",
+              "type": "select",
+              "value": "IDX-2026-041",
+              "ref": "IDEA.idea_id",
+              "required": true
+            },
+            {
+              "label": "Vote",
+              "type": "select",
+              "value": "Park",
+              "ref": "IDEA.status",
+              "required": true
+            },
+            {
+              "label": "Review date (required for Park)",
+              "type": "date",
+              "value": "2027-02-15",
+              "ref": "IDEA.review_date"
+            }
+          ]
+        },
+        {
+          "type": "actions",
+          "items": [
+            "Export agenda",
+            "Record vote"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "SCR_RA",
+      "title": "Regulatory pre-screen disposition",
+      "purpose": "Record a disposition for every pre-screen finding in each launch country.",
+      "lane": "ra",
+      "pattern": "hitl_review",
+      "url_path": "projects/PRJ-0412/regulatory",
+      "nav": [
+        "Cases",
+        "Regulatory pre-screen",
+        "Rules library",
+        "Registrations",
+        "Reports"
+      ],
+      "active_nav": "Regulatory pre-screen",
+      "status": {
+        "text": "RED hard stop",
+        "tone": "red"
+      },
+      "notes": [
+        "A clean pre-screen is not clearance: RA must record a disposition for every country.",
+        "No default clearance on SLA breach; escalation goes to the regional RA lead and the PM-I."
+      ],
+      "components": [
+        {
+          "type": "banner",
+          "text": "Hard stop: gate G2 for PRJ-0412 'Yuzu Zero 330' stays on hold until RA records a disposition for every launch country.",
+          "tone": "red"
+        },
+        {
+          "type": "tabs",
+          "items": [
+            "Germany",
+            "Saudi Arabia (GCC)",
+            "Turkey"
+          ],
+          "active": 1
+        },
+        {
+          "type": "table",
+          "title": "Findings for Saudi Arabia",
+          "headers": [
+            "Rule",
+            "Parameter",
+            "Limit",
+            "Observed",
+            "Severity",
+            "Disposition"
+          ],
+          "rows": [
+            [
+              "GCC-CAF-004 v2026.1",
+              "Caffeine",
+              "150 mg/L",
+              "165 mg/L",
+              {
+                "text": "Showstopper",
+                "tone": "red"
+              },
+              {
+                "text": "Pending",
+                "tone": "amber"
+              }
+            ],
+            [
+              "GCC-CLM-011 v2026.1",
+              "Health claim 'supports focus'",
+              "Claim not permitted",
+              "Present in back-of-pack copy",
+              {
+                "text": "Showstopper",
+                "tone": "red"
+              },
+              {
+                "text": "Pending",
+                "tone": "amber"
+              }
+            ],
+            [
+              "GCC-LBL-002 v2026.1",
+              "Best-before format",
+              "DD/MM/YYYY",
+              "MM/YYYY",
+              {
+                "text": "Warning",
+                "tone": "amber"
+              },
+              {
+                "text": "Pending",
+                "tone": "amber"
+              }
+            ]
+          ],
+          "refs": [
+            "REG.rule_id",
+            "REG.parameter",
+            "REG.limit",
+            "REG.observed",
+            "REG.severity",
+            "REG.ra_disposition"
+          ],
+          "span": 12
+        },
+        {
+          "type": "hitl_panel",
+          "agent": "AGN5 Regulatory Pre-Screen Agent",
+          "zone": "RED",
+          "confidence": "0.88",
+          "proposal": "2 potential showstoppers and 1 warning for Saudi Arabia. This is a pre-screen only. The agent cannot clear a product.",
+          "evidence": [
+            "Caffeine 165 mg/L in frozen recipe v3 vs limit 150 mg/L (rules library GCC-CAF-004, checklist EMEA 2026.1).",
+            "Registration is required for GCC; the status is read from the RA tracker."
+          ],
+          "reviewer": "Regulatory Affairs Specialist; QA Lead for allergen findings",
+          "sla": "Acknowledge 2 working days; decide within 5",
+          "override_reasons": [
+            "Documented regulatory reference required to dismiss a flag"
+          ],
+          "on_sla_breach": "Gate and artwork release stay blocked; escalate to regional RA lead and PM-I",
+          "actions": [
+            "Escalate to Legal and Regulatory",
+            "Reject: change required",
+            "Clear country"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "SCR_PACK",
+      "title": "Gate pack narrative review",
+      "purpose": "Validate the agent-drafted narrative against its sources before the Category VP pre-review.",
+      "lane": "pmi",
+      "pattern": "hitl_review",
+      "url_path": "projects/PRJ-0412/gates/G2/pack",
+      "nav": [
+        "Ideas",
+        "Duplicate review",
+        "Idea screening",
+        "Gate pipeline",
+        "Regulatory",
+        "Gate packs",
+        "Post-launch",
+        "Reports"
+      ],
+      "active_nav": "Gate packs",
+      "status": {
+        "text": "AMBER review",
+        "tone": "amber"
+      },
+      "components": [
+        {
+          "type": "stepper",
+          "items": [
+            "Slot allocated",
+            "Completeness checked",
+            "Narrative drafted",
+            "PM-I review",
+            "Category VP pre-review",
+            "ISC"
+          ],
+          "active": 3
+        },
+        {
+          "type": "kpis",
+          "items": [
+            {
+              "label": "Citation coverage",
+              "value": "98.4%",
+              "delta": "Floor 98%",
+              "tone": "green"
+            },
+            {
+              "label": "Main pack slides",
+              "value": "14 of 15",
+              "delta": "Template v3.2",
+              "tone": "green"
+            },
+            {
+              "label": "Functional sign-offs",
+              "value": "7 of 7",
+              "delta": "All valid",
+              "tone": "green"
+            },
+            {
+              "label": "COGS variance",
+              "value": "3.2%",
+              "delta": "Flag above 5%",
+              "tone": "green"
+            }
+          ],
+          "span": 12
+        },
+        {
+          "type": "table",
+          "title": "Evidence gaps flagged by the agent",
+          "headers": [
+            "Section",
+            "Gap",
+            "Source needed",
+            "Status"
+          ],
+          "rows": [
+            [
+              "Consumer evidence",
+              "Concept test for Turkey not in project folder",
+              "Insights study, Turkey",
+              {
+                "text": "Open",
+                "tone": "amber"
+              }
+            ],
+            [
+              "Risks and conditions",
+              "G1 condition 2 closure not cited",
+              "ISC minutes G1",
+              {
+                "text": "Open",
+                "tone": "amber"
+              }
+            ]
+          ],
+          "refs": [],
+          "span": 12
+        },
+        {
+          "type": "hitl_panel",
+          "agent": "AGN3 Gate Narrative Drafting Agent",
+          "zone": "AMBER",
+          "confidence": "0.91",
+          "proposal": "Approve the 6-section draft for the G2 gate pack after the two evidence gaps are closed. No figure was changed by the agent.",
+          "evidence": [
+            "Every number matches the business case v14 (date-stamped) and the Tracker row.",
+            "Uncited claims were removed and listed as gaps."
+          ],
+          "reviewer": "PM-I, then Category VP at pre-review",
+          "sla": "Review done 5 working days before the meeting",
+          "override_reasons": [
+            "Factual correction",
+            "Positioning change",
+            "Figure update"
+          ],
+          "on_sla_breach": "Slot released to the next eligible request",
+          "actions": [
+            "Reject and regenerate",
+            "Modify",
+            "Approve pack"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "SCR_DECISION",
+      "title": "Record ISC gate decision",
+      "purpose": "Release check and decision entry after the ISC chair states the outcome.",
+      "lane": "isc",
+      "pattern": "form",
+      "url_path": "projects/PRJ-0412/gates/G2/decision",
+      "nav": [
+        "Agenda",
+        "Gate decisions",
+        "Action logs",
+        "Reports"
+      ],
+      "active_nav": "Gate decisions",
+      "status": {
+        "text": "Released to ISC",
+        "tone": "green"
+      },
+      "components": [
+        {
+          "type": "table",
+          "title": "Release prerequisites (ATS10)",
+          "headers": [
+            "Prerequisite",
+            "Rule",
+            "Status"
+          ],
+          "rows": [
+            [
+              "Seven functional sign-offs",
+              "All seven present and valid",
+              {
+                "text": "Pass",
+                "tone": "green"
+              }
+            ],
+            [
+              "Template version",
+              "v3.2 for G0-G2",
+              {
+                "text": "Pass",
+                "tone": "green"
+              }
+            ],
+            [
+              "RA disposition",
+              "Recorded for every launch country",
+              {
+                "text": "Pass",
+                "tone": "green"
+              }
+            ],
+            [
+              "Funding route",
+              "Under EUR 50k Category VP, 50-250k CFO Office, over 250k ISC",
+              {
+                "text": "Pass",
+                "tone": "green"
+              }
+            ]
+          ],
+          "refs": [
+            "GATE.hold_reasons",
+            "",
+            ""
+          ],
+          "span": 7
+        },
+        {
+          "type": "form",
+          "title": "Decision",
+          "span": 5,
+          "fields": [
+            {
+              "label": "Project",
+              "type": "readonly",
+              "value": "PRJ-0412 Yuzu Zero 330",
+              "ref": "DEC.project_code"
+            },
+            {
+              "label": "Gate",
+              "type": "readonly",
+              "value": "G2",
+              "ref": "DEC.gate"
+            },
+            {
+              "label": "Decision",
+              "type": "select",
+              "value": "Go with conditions",
+              "ref": "DEC.decision",
+              "required": true
+            },
+            {
+              "label": "Decision date",
+              "type": "date",
+              "value": "2027-01-21",
+              "ref": "DEC.decided_on",
+              "required": true
+            },
+            {
+              "label": "Conditions",
+              "type": "textarea",
+              "value": "Close Turkey concept test before G3. RA to confirm GCC caffeine level.",
+              "ref": "DEC.conditions"
+            }
+          ]
+        },
+        {
+          "type": "actions",
+          "items": [
+            "Cancel",
+            "Record decision"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "SCR_G5",
+      "title": "Post-launch review approval",
+      "purpose": "Approve the G5 findings against the G2 baseline before the ISC slot.",
+      "lane": "pmi",
+      "pattern": "hitl_review",
+      "url_path": "projects/PRJ-0311/g5",
+      "nav": [
+        "Ideas",
+        "Duplicate review",
+        "Idea screening",
+        "Gate pipeline",
+        "Regulatory",
+        "Gate packs",
+        "Post-launch",
+        "Reports"
+      ],
+      "active_nav": "Post-launch",
+      "status": {
+        "text": "AMBER review",
+        "tone": "amber"
+      },
+      "components": [
+        {
+          "type": "kpis",
+          "items": [
+            {
+              "label": "NPV vs baseline",
+              "value": "-11.9%",
+              "delta": "EUR 3.7m vs 4.2m (illustrative)",
+              "tone": "red"
+            },
+            {
+              "label": "Year-3 volume vs baseline",
+              "value": "+3.8%",
+              "delta": "On track",
+              "tone": "green"
+            },
+            {
+              "label": "Dataset completeness",
+              "value": "100%",
+              "delta": "All OpCos present",
+              "tone": "green"
+            }
+          ],
+          "span": 12
+        },
+        {
+          "type": "bar_chart",
+          "title": "Volume variance by OpCo",
+          "span": 6,
+          "items": [
+            {
+              "label": "Germany",
+              "value": 6.1,
+              "display": "+6.1%",
+              "tone": "green"
+            },
+            {
+              "label": "France",
+              "value": 3.0,
+              "display": "+3.0%",
+              "tone": "green"
+            },
+            {
+              "label": "UAE",
+              "value": 1.2,
+              "display": "+1.2%",
+              "tone": "blue"
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "title": "Baseline vs actual",
+          "headers": [
+            "Metric",
+            "G2 baseline",
+            "Actual",
+            "Variance"
+          ],
+          "rows": [
+            [
+              "NPV",
+              "EUR 4.2m",
+              "EUR 3.7m",
+              {
+                "text": "-11.9%",
+                "tone": "red"
+              }
+            ],
+            [
+              "Year-3 volume",
+              "1.85m cases",
+              "1.92m cases",
+              {
+                "text": "+3.8%",
+                "tone": "green"
+              }
+            ]
+          ],
+          "refs": [
+            "",
+            "PROJ.npv_baseline",
+            "G5.npv_actual",
+            "G5.npv_variance_pct"
+          ],
+          "span": 6
+        },
+        {
+          "type": "hitl_panel",
+          "agent": "AGN6 Post-Launch Review Agent",
+          "zone": "AMBER",
+          "confidence": "0.82",
+          "proposal": "Recommend Renovate: volume is ahead of baseline but NPV is behind because actual COGS exceeds the business case by 9%.",
+          "evidence": [
+            "COGS actual vs business case: SAP CK11n and internal order actuals, dataset cell C14.",
+            "Volume variance by OpCo: ATS12 dataset table 2."
+          ],
+          "reviewer": "PM-I and BM; Innovation Finance Controller verifies financial variances",
+          "sla": "5 working days from generation",
+          "override_reasons": [
+            "Factual correction",
+            "Root-cause disagreement",
+            "Recommendation change"
+          ],
+          "on_sla_breach": "G5 item flagged red in the Tracker and escalated to VP Global Innovation",
+          "actions": [
+            "Reject and regenerate",
+            "Modify",
+            "Approve for ISC"
+          ]
+        }
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "screen_id": "SCR_DUP",
+      "ui_field": "Idea ID (banner)",
+      "integration_id": "INT_REG",
+      "json_path": "idea_id",
+      "ref": "IDEA.idea_id",
+      "direction": "read"
+    },
+    {
+      "screen_id": "SCR_DUP",
+      "ui_field": "Idea status",
+      "integration_id": "INT_REG",
+      "json_path": "status",
+      "ref": "IDEA.status",
+      "direction": "read"
+    },
+    {
+      "screen_id": "SCR_DUP",
+      "ui_field": "Match",
+      "integration_id": "INT_DUP",
+      "json_path": "matches[].matched_id",
+      "ref": "DUP.matched_id",
+      "direction": "read"
+    },
+    {
+      "screen_id": "SCR_DUP",
+      "ui_field": "Similarity",
+      "integration_id": "INT_DUP",
+      "json_path": "matches[].similarity",
+      "ref": "DUP.similarity",
+      "direction": "read",
+      "transform": "2 decimals"
+    },
+    {
+      "screen_id": "SCR_DUP",
+      "ui_field": "Proposed relation",
+      "integration_id": "INT_DUP",
+      "json_path": "matches[].relation",
+      "ref": "DUP.relation",
+      "direction": "read"
+    },
+    {
+      "screen_id": "SCR_DUP",
+      "ui_field": "Proposal evidence",
+      "integration_id": "INT_DUP",
+      "json_path": "matches[].rationale",
+      "ref": "DUP.rationale",
+      "direction": "read"
+    },
+    {
+      "screen_id": "SCR_DUP",
+      "ui_field": "Confidence",
+      "integration_id": "INT_DUP",
+      "json_path": "confidence",
+      "ref": "DUP.confidence",
+      "direction": "read",
+      "transform": "Below 0.70 show Needs PM-I review"
+    },
+    {
+      "screen_id": "SCR_DUP",
+      "ui_field": "Link ID",
+      "integration_id": "INT_DUPDEC",
+      "json_path": "link_id",
+      "ref": "DUP.link_id",
+      "direction": "write"
+    },
+    {
+      "screen_id": "SCR_DUP",
+      "ui_field": "PM-I ruling",
+      "integration_id": "INT_DUPDEC",
+      "json_path": "decision",
+      "ref": "DUP.decision",
+      "direction": "write",
+      "trigger": "On Approve, Reject, Modify or Escalate"
+    },
+    {
+      "screen_id": "SCR_DUP",
+      "ui_field": "Override reason",
+      "integration_id": "INT_DUPDEC",
+      "json_path": "override_reason",
+      "ref": "DUP.override_reason",
+      "direction": "write",
+      "transform": "Mandatory when the PM-I changes the proposal"
+    },
+    {
+      "screen_id": "SCR_SCREEN",
+      "ui_field": "Idea ID",
+      "integration_id": "INT_IDEAS",
+      "json_path": "records[].idea_id",
+      "ref": "IDEA.idea_id",
+      "direction": "read"
+    },
+    {
+      "screen_id": "SCR_SCREEN",
+      "ui_field": "Title",
+      "integration_id": "INT_IDEAS",
+      "json_path": "records[].title",
+      "ref": "IDEA.title",
+      "direction": "read"
+    },
+    {
+      "screen_id": "SCR_SCREEN",
+      "ui_field": "Status",
+      "integration_id": "INT_IDEAS",
+      "json_path": "records[].status",
+      "ref": "IDEA.status",
+      "direction": "read"
+    },
+    {
+      "screen_id": "SCR_SCREEN",
+      "ui_field": "Weighted score",
+      "integration_id": "INT_SCORE",
+      "json_path": "result",
+      "ref": "IDEA.weighted_score",
+      "direction": "read",
+      "transform": "1 decimal; highlight above 60"
+    },
+    {
+      "screen_id": "SCR_SCREEN",
+      "ui_field": "Vote",
+      "integration_id": "INT_VOTE",
+      "json_path": "status",
+      "ref": "IDEA.status",
+      "direction": "write"
+    },
+    {
+      "screen_id": "SCR_SCREEN",
+      "ui_field": "Review date",
+      "integration_id": "INT_VOTE",
+      "json_path": "review_date",
+      "ref": "IDEA.review_date",
+      "direction": "write",
+      "transform": "Required when the vote is Park"
+    },
+    {
+      "screen_id": "SCR_RA",
+      "ui_field": "Country",
+      "integration_id": "INT_REGSCR",
+      "json_path": "findings[].country",
+      "ref": "REG.country",
+      "direction": "read"
+    },
+    {
+      "screen_id": "SCR_RA",
+      "ui_field": "Rule",
+      "integration_id": "INT_REGSCR",
+      "json_path": "findings[].rule_id",
+      "ref": "REG.rule_id",
+      "direction": "read"
+    },
+    {
+      "screen_id": "SCR_RA",
+      "ui_field": "Parameter",
+      "integration_id": "INT_REGSCR",
+      "json_path": "findings[].parameter",
+      "ref": "REG.parameter",
+      "direction": "read"
+    },
+    {
+      "screen_id": "SCR_RA",
+      "ui_field": "Limit",
+      "integration_id": "INT_REGSCR",
+      "json_path": "findings[].limit",
+      "ref": "REG.limit",
+      "direction": "read"
+    },
+    {
+      "screen_id": "SCR_RA",
+      "ui_field": "Observed",
+      "integration_id": "INT_REGSCR",
+      "json_path": "findings[].observed",
+      "ref": "REG.observed",
+      "direction": "read"
+    },
+    {
+      "screen_id": "SCR_RA",
+      "ui_field": "Severity",
+      "integration_id": "INT_REGSCR",
+      "json_path": "findings[].severity",
+      "ref": "REG.severity",
+      "direction": "read",
+      "transform": "Showstopper red, Warning amber"
+    },
+    {
+      "screen_id": "SCR_RA",
+      "ui_field": "Checklist version",
+      "integration_id": "INT_REGSCR",
+      "json_path": "checklist_version",
+      "ref": "REG.checklist_version",
+      "direction": "read"
+    },
+    {
+      "screen_id": "SCR_RA",
+      "ui_field": "Finding ID",
+      "integration_id": "INT_RACASE",
+      "json_path": "finding_id",
+      "ref": "REG.finding_id",
+      "direction": "write"
+    },
+    {
+      "screen_id": "SCR_RA",
+      "ui_field": "Disposition",
+      "integration_id": "INT_RACASE",
+      "json_path": "ra_disposition",
+      "ref": "REG.ra_disposition",
+      "direction": "write",
+      "trigger": "On Clear, Reject or Escalate"
+    },
+    {
+      "screen_id": "SCR_RA",
+      "ui_field": "Regulatory reference",
+      "integration_id": "INT_RACASE",
+      "json_path": "regulatory_reference",
+      "ref": "REG.regulatory_reference",
+      "direction": "write",
+      "transform": "Mandatory to dismiss a flag"
+    },
+    {
+      "screen_id": "SCR_PACK",
+      "ui_field": "Citation coverage",
+      "integration_id": "INT_DRAFT",
+      "json_path": "citation_coverage_pct",
+      "ref": "GATE.citation_coverage_pct",
+      "direction": "read",
+      "transform": "Red below 98%"
+    },
+    {
+      "screen_id": "SCR_PACK",
+      "ui_field": "Narrative draft",
+      "integration_id": "INT_DRAFT",
+      "json_path": "narrative_draft",
+      "ref": "GATE.narrative_draft",
+      "direction": "read"
+    },
+    {
+      "screen_id": "SCR_PACK",
+      "ui_field": "Main pack slides",
+      "integration_id": "INT_PACK",
+      "json_path": "pack_slide_count",
+      "ref": "GATE.pack_slide_count",
+      "direction": "read",
+      "transform": "Show as n of 15"
+    },
+    {
+      "screen_id": "SCR_PACK",
+      "ui_field": "Functional sign-offs",
+      "integration_id": "INT_PACK",
+      "json_path": "signoffs_received",
+      "ref": "GATE.signoffs_received",
+      "direction": "read",
+      "transform": "Show as n of 7"
+    },
+    {
+      "screen_id": "SCR_PACK",
+      "ui_field": "Template version",
+      "integration_id": "INT_PACK",
+      "json_path": "template_version",
+      "ref": "GATE.template_version",
+      "direction": "read"
+    },
+    {
+      "screen_id": "SCR_PACK",
+      "ui_field": "COGS variance",
+      "integration_id": "INT_VAR",
+      "json_path": "cogs_variance_pct",
+      "ref": "GATE.cogs_variance_pct",
+      "direction": "read",
+      "transform": "Red above 5%"
+    },
+    {
+      "screen_id": "SCR_PACK",
+      "ui_field": "Pack status",
+      "integration_id": "INT_PACKAPPR",
+      "json_path": "pack_status",
+      "ref": "GATE.pack_status",
+      "direction": "write"
+    },
+    {
+      "screen_id": "SCR_PACK",
+      "ui_field": "Reviewer comment",
+      "integration_id": "INT_PACKAPPR",
+      "json_path": "reviewer_comment",
+      "ref": "GATE.reviewer_comment",
+      "direction": "write"
+    },
+    {
+      "screen_id": "SCR_DECISION",
+      "ui_field": "Hold reasons",
+      "integration_id": "INT_HOLD",
+      "json_path": "violations[].description",
+      "ref": "GATE.hold_reasons",
+      "direction": "read",
+      "transform": "Empty list means Pass"
+    },
+    {
+      "screen_id": "SCR_DECISION",
+      "ui_field": "Project",
+      "integration_id": "INT_DECIDE",
+      "json_path": "project_code",
+      "ref": "DEC.project_code",
+      "direction": "write"
+    },
+    {
+      "screen_id": "SCR_DECISION",
+      "ui_field": "Gate",
+      "integration_id": "INT_DECIDE",
+      "json_path": "gate",
+      "ref": "DEC.gate",
+      "direction": "write"
+    },
+    {
+      "screen_id": "SCR_DECISION",
+      "ui_field": "Decision",
+      "integration_id": "INT_DECIDE",
+      "json_path": "decision",
+      "ref": "DEC.decision",
+      "direction": "write"
+    },
+    {
+      "screen_id": "SCR_DECISION",
+      "ui_field": "Conditions",
+      "integration_id": "INT_DECIDE",
+      "json_path": "conditions",
+      "ref": "DEC.conditions",
+      "direction": "write"
+    },
+    {
+      "screen_id": "SCR_DECISION",
+      "ui_field": "Decision date",
+      "integration_id": "INT_DECIDE",
+      "json_path": "decided_on",
+      "ref": "DEC.decided_on",
+      "direction": "write"
+    },
+    {
+      "screen_id": "SCR_DECISION",
+      "ui_field": "Filed record path",
+      "integration_id": "INT_DECIDE",
+      "json_path": "filed_path",
+      "ref": "DEC.filed_path",
+      "direction": "read"
+    },
+    {
+      "screen_id": "SCR_DECISION",
+      "ui_field": "ISC meeting date",
+      "integration_id": "INT_SLOT",
+      "json_path": "isc_meeting_date",
+      "ref": "GATE.isc_meeting_date",
+      "direction": "read"
+    },
+    {
+      "screen_id": "SCR_G5",
+      "ui_field": "NPV baseline",
+      "integration_id": "INT_G5DATA",
+      "json_path": "npv_baseline",
+      "ref": "PROJ.npv_baseline",
+      "direction": "read"
+    },
+    {
+      "screen_id": "SCR_G5",
+      "ui_field": "NPV actual",
+      "integration_id": "INT_G5DATA",
+      "json_path": "npv_actual",
+      "ref": "G5.npv_actual",
+      "direction": "read"
+    },
+    {
+      "screen_id": "SCR_G5",
+      "ui_field": "NPV variance",
+      "integration_id": "INT_G5DATA",
+      "json_path": "npv_variance_pct",
+      "ref": "G5.npv_variance_pct",
+      "direction": "read",
+      "transform": "Signed percentage; red below -5%"
+    },
+    {
+      "screen_id": "SCR_G5",
+      "ui_field": "Volume actual",
+      "integration_id": "INT_G5DATA",
+      "json_path": "volume_actual",
+      "ref": "G5.volume_actual",
+      "direction": "read"
+    },
+    {
+      "screen_id": "SCR_G5",
+      "ui_field": "Volume variance",
+      "integration_id": "INT_G5DATA",
+      "json_path": "volume_variance_pct",
+      "ref": "G5.volume_variance_pct",
+      "direction": "read"
+    },
+    {
+      "screen_id": "SCR_G5",
+      "ui_field": "Recommendation",
+      "integration_id": "INT_SYNTH",
+      "json_path": "recommendation",
+      "ref": "G5.recommendation",
+      "direction": "read"
+    },
+    {
+      "screen_id": "SCR_G5",
+      "ui_field": "Findings",
+      "integration_id": "INT_SYNTH",
+      "json_path": "findings",
+      "ref": "G5.findings",
+      "direction": "read"
+    },
+    {
+      "screen_id": "SCR_G5",
+      "ui_field": "Confidence",
+      "integration_id": "INT_SYNTH",
+      "json_path": "confidence",
+      "ref": "G5.confidence",
+      "direction": "read",
+      "transform": "Below 0.75 shows no recommendation"
+    },
+    {
+      "screen_id": "SCR_G5",
+      "ui_field": "Review status",
+      "integration_id": "INT_PACKAPPR",
+      "json_path": "review_status",
+      "ref": "G5.review_status",
+      "direction": "write"
+    }
+  ],
+  "use_cases": [
+    {
+      "id": "UC01",
+      "title": "Confirm duplicate and related ideas",
+      "lane": "pmi",
+      "goal": "Rule on every agent-proposed link before the Friday log close, with reason codes on overrides.",
+      "success_measure": "100% of ideas ruled within 3 working days",
+      "screen_ids": [
+        "SCR_DUP"
+      ],
+      "step_ids": [
+        "S02",
+        "S03"
+      ]
+    },
+    {
+      "id": "UC02",
+      "title": "Run the monthly Idea Screening",
+      "lane": "pmi",
+      "goal": "Vote proceed, park or reject on every idea above 60 and set a review date for Parked ideas.",
+      "success_measure": "100% of Parked ideas carry a review date",
+      "screen_ids": [
+        "SCR_SCREEN"
+      ],
+      "step_ids": [
+        "S04",
+        "S05"
+      ]
+    },
+    {
+      "id": "UC03",
+      "title": "Disposition regulatory pre-screen findings",
+      "lane": "ra",
+      "goal": "Record a clear, reject or escalate disposition for every finding in every launch country.",
+      "success_measure": "Every country dispositioned within 5 working days; zero false negatives",
+      "screen_ids": [
+        "SCR_RA"
+      ],
+      "step_ids": [
+        "S09",
+        "S10"
+      ]
+    },
+    {
+      "id": "UC04",
+      "title": "Approve the gate pack narrative",
+      "lane": "pmi",
+      "goal": "Validate every claim and figure against its source before the Category VP pre-review.",
+      "success_measure": "40% less pack preparation effort (assumed target)",
+      "screen_ids": [
+        "SCR_PACK"
+      ],
+      "step_ids": [
+        "S11",
+        "S12"
+      ]
+    },
+    {
+      "id": "UC05",
+      "title": "Record the ISC gate decision",
+      "lane": "isc",
+      "goal": "Record Go, Go with conditions, Recycle or Kill within 2 working days, with filed records.",
+      "success_measure": "100% of decisions recorded within 2 working days",
+      "screen_ids": [
+        "SCR_DECISION"
+      ],
+      "step_ids": [
+        "S13",
+        "S14",
+        "S15"
+      ]
+    },
+    {
+      "id": "UC06",
+      "title": "Approve the post-launch review",
+      "lane": "pmi",
+      "goal": "Approve G5 findings measured against the G2 baseline before the ISC slot.",
+      "success_measure": "At least 90% of post-launch reviews on schedule (assumed target)",
+      "screen_ids": [
+        "SCR_G5"
+      ],
+      "step_ids": [
+        "S16",
+        "S17",
+        "S18"
+      ]
+    }
+  ],
+  "reports": [
+    {
+      "id": "RPT01",
+      "title": "Ideation funnel",
+      "lane": "pmi",
+      "question": "How many ideas enter, get de-duplicated, score above 60 and proceed each month?",
+      "use_case_ids": [
+        "UC01",
+        "UC02"
+      ],
+      "screen_ids": [
+        "SCR_DUP",
+        "SCR_SCREEN"
+      ],
+      "dimensions": [
+        "Month",
+        "Brand",
+        "OpCo",
+        "Intake channel"
+      ],
+      "filters": [
+        "Brand",
+        "OpCo",
+        "Category",
+        "Date range"
+      ],
+      "refresh": "After each Friday batch",
+      "access": "PM-I, BM, VP Global Innovation",
+      "exports": [
+        "XLSX",
+        "PDF"
+      ],
+      "alerts": [
+        "Override rate above 30% over a rolling 20 ideas"
+      ],
+      "drill_down": "Funnel stage to idea list to SCR_DUP",
+      "nav": [
+        "Ideas",
+        "Duplicate review",
+        "Idea screening",
+        "Gate pipeline",
+        "Regulatory",
+        "Gate packs",
+        "Post-launch",
+        "Reports"
+      ],
+      "components": [
+        {
+          "type": "kpis",
+          "items": [
+            {
+              "label": "Ideas registered (month)",
+              "value": "46",
+              "delta": "+8 vs last month (illustrative)",
+              "tone": "blue"
+            },
+            {
+              "label": "Duplicate rate",
+              "value": "17%",
+              "delta": "8 of 46",
+              "tone": "amber"
+            },
+            {
+              "label": "Above 60",
+              "value": "9",
+              "delta": "20% of ideas",
+              "tone": "green"
+            },
+            {
+              "label": "Proceed rate",
+              "value": "33%",
+              "delta": "3 of 9",
+              "tone": "blue"
+            }
+          ],
+          "span": 12
+        },
+        {
+          "type": "bar_chart",
+          "title": "Funnel",
+          "span": 6,
+          "items": [
+            {
+              "label": "Registered",
+              "value": 46,
+              "tone": "blue"
+            },
+            {
+              "label": "After duplicate review",
+              "value": 38,
+              "tone": "blue"
+            },
+            {
+              "label": "Above 60",
+              "value": 9,
+              "tone": "amber"
+            },
+            {
+              "label": "Proceed",
+              "value": 3,
+              "tone": "green"
+            }
+          ]
+        },
+        {
+          "type": "donut_chart",
+          "title": "Intake by channel",
+          "span": 6,
+          "center": "46",
+          "items": [
+            {
+              "label": "Idea Box form",
+              "value": 31,
+              "tone": "blue"
+            },
+            {
+              "label": "Brand Manager email",
+              "value": 15,
+              "tone": "amber"
+            }
+          ]
+        }
+      ],
+      "kpis": [
+        {
+          "name": "Ideas registered",
+          "definition": "Count of ideas receiving an ID in the period.",
+          "formula": "COUNT(idea_id)",
+          "unit": "ideas",
+          "source": "Idea Log",
+          "refs": [
+            "IDEA.idea_id"
+          ]
+        },
+        {
+          "name": "Duplicate rate",
+          "definition": "Share of ideas with an approved Duplicate or Related link.",
+          "formula": "COUNT(decision = Approve link) / COUNT(idea_id)",
+          "unit": "%",
+          "source": "Duplicate links",
+          "refs": [
+            "DUP.decision",
+            "IDEA.idea_id"
+          ]
+        },
+        {
+          "name": "Above-threshold share",
+          "definition": "Share of scored ideas above 60.",
+          "formula": "COUNT(weighted_score > 60) / COUNT(weighted_score)",
+          "unit": "%",
+          "source": "Idea Log",
+          "refs": [
+            "IDEA.weighted_score"
+          ]
+        },
+        {
+          "name": "Parked with review date",
+          "definition": "Parked ideas carrying a review date.",
+          "formula": "COUNT(status = Parked AND review_date IS NOT NULL) / COUNT(status = Parked)",
+          "unit": "%",
+          "source": "Idea Log",
+          "refs": [
+            "IDEA.status",
+            "IDEA.review_date"
+          ],
+          "target": "100%"
+        }
+      ]
+    },
+    {
+      "id": "RPT02",
+      "title": "Stage-gate control",
+      "lane": "isc",
+      "question": "Where is every project in G0 to G5, what is holding it, and how full is the ISC agenda?",
+      "use_case_ids": [
+        "UC03",
+        "UC04",
+        "UC05"
+      ],
+      "screen_ids": [
+        "SCR_RA",
+        "SCR_PACK",
+        "SCR_DECISION"
+      ],
+      "dimensions": [
+        "Gate",
+        "RAG",
+        "OpCo",
+        "SOP version",
+        "Hold reason"
+      ],
+      "filters": [
+        "Gate",
+        "OpCo",
+        "RAG"
+      ],
+      "refresh": "Near real time",
+      "access": "PM-I, ISC secretariat, RA lead, VP Global Innovation",
+      "exports": [
+        "XLSX"
+      ],
+      "alerts": [
+        "Hold over 10 working days",
+        "SOP v2.x OpCo after cut-over date"
+      ],
+      "drill_down": "Gate row to the SCR_PACK or SCR_RA case",
+      "nav": [
+        "Agenda",
+        "Gate decisions",
+        "Action logs",
+        "Reports"
+      ],
+      "components": [
+        {
+          "type": "kpis",
+          "items": [
+            {
+              "label": "Active projects",
+              "value": "23",
+              "delta": "5 at G2 (illustrative)",
+              "tone": "blue"
+            },
+            {
+              "label": "ISC slots used",
+              "value": "5 of 6",
+              "delta": "Next meeting",
+              "tone": "amber"
+            },
+            {
+              "label": "Open holds",
+              "value": "4",
+              "delta": "1 over 10 days",
+              "tone": "red"
+            },
+            {
+              "label": "Decisions recorded in 2 days",
+              "value": "96%",
+              "delta": "Target 100%",
+              "tone": "amber"
+            }
+          ],
+          "span": 12
+        },
+        {
+          "type": "bar_chart",
+          "title": "Projects by gate",
+          "span": 6,
+          "items": [
+            {
+              "label": "G0",
+              "value": 6,
+              "tone": "blue"
+            },
+            {
+              "label": "G1",
+              "value": 5,
+              "tone": "blue"
+            },
+            {
+              "label": "G2",
+              "value": 5,
+              "tone": "blue"
+            },
+            {
+              "label": "G3",
+              "value": 4,
+              "tone": "blue"
+            },
+            {
+              "label": "G4",
+              "value": 3,
+              "tone": "blue"
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "title": "Open holds",
+          "headers": [
+            "Project",
+            "Gate",
+            "Hold reason",
+            "Age (days)"
+          ],
+          "rows": [
+            [
+              "PRJ-0412",
+              "G2",
+              "RA disposition pending (GCC)",
+              {
+                "text": "6",
+                "tone": "amber"
+              }
+            ],
+            [
+              "PRJ-0398",
+              "G3",
+              "Local G3 missing for OpCo FR",
+              {
+                "text": "12",
+                "tone": "red"
+              }
+            ]
+          ],
+          "refs": [],
+          "span": 6
+        }
+      ],
+      "kpis": [
+        {
+          "name": "Gate decision recording time",
+          "definition": "Working days from ISC decision to recorded decision.",
+          "formula": "AVG(recorded_on - decided_on)",
+          "unit": "working days",
+          "source": "Gate decisions",
+          "refs": [
+            "DEC.decided_on"
+          ],
+          "target": "2"
+        },
+        {
+          "name": "Slot utilisation",
+          "definition": "Allocated gates over the 6-gate maximum.",
+          "formula": "COUNT(slot_status = Allocated) / 6",
+          "unit": "%",
+          "source": "Gate requests",
+          "refs": [
+            "GATE.slot_status"
+          ]
+        },
+        {
+          "name": "Open holds over 10 days",
+          "definition": "Holds older than 10 working days.",
+          "formula": "COUNT(hold_age > 10)",
+          "unit": "holds",
+          "source": "Gate requests",
+          "refs": [
+            "GATE.hold_reasons"
+          ]
+        },
+        {
+          "name": "Version non-compliance",
+          "definition": "Gate packs from OpCos on SOP v2.x.",
+          "formula": "COUNT(sop_version = v2.x)",
+          "unit": "packs",
+          "source": "Projects",
+          "refs": [
+            "PROJ.sop_version"
+          ],
+          "target": "0"
+        }
+      ]
+    },
+    {
+      "id": "RPT03",
+      "title": "Post-launch performance",
+      "lane": "pmi",
+      "question": "How do launches perform against the G2 baseline and are G5 reviews on schedule?",
+      "use_case_ids": [
+        "UC06"
+      ],
+      "screen_ids": [
+        "SCR_G5"
+      ],
+      "dimensions": [
+        "Launch",
+        "OpCo",
+        "Category",
+        "Month"
+      ],
+      "filters": [
+        "OpCo",
+        "Category",
+        "Launch year"
+      ],
+      "refresh": "Monthly, aligned to the ISC",
+      "access": "PM-I, BM, Innovation Finance Controller, ISC",
+      "exports": [
+        "PDF",
+        "XLSX"
+      ],
+      "alerts": [
+        "On-schedule rate below 90% (assumed)"
+      ],
+      "drill_down": "Launch to SCR_G5",
+      "nav": [
+        "Ideas",
+        "Duplicate review",
+        "Idea screening",
+        "Gate pipeline",
+        "Regulatory",
+        "Gate packs",
+        "Post-launch",
+        "Reports"
+      ],
+      "components": [
+        {
+          "type": "kpis",
+          "items": [
+            {
+              "label": "G5 on schedule",
+              "value": "88%",
+              "delta": "Target 90% (assumed)",
+              "tone": "amber"
+            },
+            {
+              "label": "Average NPV variance",
+              "value": "-4.2%",
+              "delta": "12 launches (illustrative)",
+              "tone": "amber"
+            },
+            {
+              "label": "Retire candidates",
+              "value": "2",
+              "delta": "ISC decision",
+              "tone": "red"
+            }
+          ],
+          "span": 12
+        },
+        {
+          "type": "line_chart",
+          "title": "G5 on-schedule rate by quarter (%)",
+          "span": 7,
+          "target": 90,
+          "items": [
+            {
+              "label": "Q1",
+              "value": 78
+            },
+            {
+              "label": "Q2",
+              "value": 82
+            },
+            {
+              "label": "Q3",
+              "value": 85
+            },
+            {
+              "label": "Q4",
+              "value": 88
+            }
+          ]
+        },
+        {
+          "type": "donut_chart",
+          "title": "Recommendation mix",
+          "span": 5,
+          "center": "12",
+          "items": [
+            {
+              "label": "Continue",
+              "value": 7,
+              "tone": "green"
+            },
+            {
+              "label": "Renovate",
+              "value": 3,
+              "tone": "amber"
+            },
+            {
+              "label": "Retire",
+              "value": 2,
+              "tone": "red"
+            }
+          ]
+        }
+      ],
+      "kpis": [
+        {
+          "name": "G5 on-schedule rate",
+          "definition": "Reviews completed by the G5 due date.",
+          "formula": "COUNT(completed_on <= due_date) / COUNT(due_date <= today)",
+          "unit": "%",
+          "source": "Post-launch reviews",
+          "refs": [
+            "G5.review_id"
+          ],
+          "target": "90% (assumed)"
+        },
+        {
+          "name": "NPV variance",
+          "definition": "Actual vs G2 baseline NPV.",
+          "formula": "(npv_actual - npv_baseline) / npv_baseline",
+          "unit": "%",
+          "source": "G5 dataset",
+          "refs": [
+            "G5.npv_variance_pct",
+            "PROJ.npv_baseline"
+          ]
+        },
+        {
+          "name": "Volume variance",
+          "definition": "Actual vs G2 Year-3 volume.",
+          "formula": "(volume_actual - y3_volume_baseline) / y3_volume_baseline",
+          "unit": "%",
+          "source": "G5 dataset",
+          "refs": [
+            "G5.volume_variance_pct",
+            "PROJ.y3_volume_baseline"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "RPT04",
+      "title": "Human-in-the-loop and autonomy",
+      "lane": "pmi",
+      "question": "How often do reviewers accept, override or escalate AI proposals, and is any AI step ready for promotion?",
+      "use_case_ids": [
+        "UC01",
+        "UC03",
+        "UC04",
+        "UC06"
+      ],
+      "screen_ids": [
+        "SCR_DUP",
+        "SCR_RA",
+        "SCR_PACK",
+        "SCR_G5"
+      ],
+      "dimensions": [
+        "Agent",
+        "Step",
+        "Reviewer role",
+        "Override reason",
+        "Week"
+      ],
+      "filters": [
+        "Agent",
+        "Zone",
+        "Date range"
+      ],
+      "refresh": "Daily",
+      "access": "VP Global Innovation, PM-I lead, RA lead, Control Tower owners",
+      "exports": [
+        "XLSX"
+      ],
+      "alerts": [
+        "Any false negative on a regulatory showstopper",
+        "Override rate above 30% over a rolling 20"
+      ],
+      "drill_down": "Agent to override reasons to the review screen",
+      "nav": [
+        "Ideas",
+        "Duplicate review",
+        "Idea screening",
+        "Gate pipeline",
+        "Regulatory",
+        "Gate packs",
+        "Post-launch",
+        "Reports"
+      ],
+      "components": [
+        {
+          "type": "kpis",
+          "items": [
+            {
+              "label": "Acceptance rate (all AI steps)",
+              "value": "74%",
+              "delta": "Illustrative",
+              "tone": "blue"
+            },
+            {
+              "label": "Overrides (rolling 20)",
+              "value": "18%",
+              "delta": "Halt at 30%",
+              "tone": "green"
+            },
+            {
+              "label": "Review SLA breaches",
+              "value": "3",
+              "delta": "This month",
+              "tone": "amber"
+            },
+            {
+              "label": "False negatives (RA)",
+              "value": "0",
+              "delta": "P1 alert if above 0",
+              "tone": "green"
+            }
+          ],
+          "span": 12
+        },
+        {
+          "type": "bar_chart",
+          "title": "Acceptance rate by AI step (%)",
+          "span": 7,
+          "items": [
+            {
+              "label": "ATS2 duplicates",
+              "value": 82,
+              "tone": "green"
+            },
+            {
+              "label": "ATS6 gate narrative",
+              "value": 68,
+              "tone": "amber"
+            },
+            {
+              "label": "ATS9 regulatory (RA agreement)",
+              "value": 91,
+              "tone": "green"
+            },
+            {
+              "label": "ATS13 post-launch",
+              "value": 71,
+              "tone": "amber"
+            }
+          ]
+        },
+        {
+          "type": "donut_chart",
+          "title": "Override reasons",
+          "span": 5,
+          "center": "31",
+          "items": [
+            {
+              "label": "Different format",
+              "value": 11,
+              "tone": "blue"
+            },
+            {
+              "label": "Factual correction",
+              "value": 12,
+              "tone": "amber"
+            },
+            {
+              "label": "Root-cause disagreement",
+              "value": 8,
+              "tone": "red"
+            }
+          ]
+        }
+      ],
+      "kpis": [
+        {
+          "name": "Acceptance rate",
+          "definition": "Proposals accepted without edit.",
+          "formula": "COUNT(decision = approve) / COUNT(proposals)",
+          "unit": "%",
+          "source": "HITL decisions",
+          "refs": [
+            "DUP.decision"
+          ]
+        },
+        {
+          "name": "Override rate",
+          "definition": "Proposals changed or rejected, rolling 20.",
+          "formula": "COUNT(override) / 20",
+          "unit": "%",
+          "source": "HITL decisions",
+          "refs": [
+            "DUP.override_reason"
+          ],
+          "target": "Below 30%"
+        },
+        {
+          "name": "RA agreement rate",
+          "definition": "Agent findings upheld by RA.",
+          "formula": "COUNT(ra_disposition IN (Rejected, Escalated)) / COUNT(findings)",
+          "unit": "%",
+          "source": "RA tracker",
+          "refs": [
+            "REG.ra_disposition"
+          ],
+          "target": "At least 90%"
+        }
+      ]
+    }
+  ]
+}

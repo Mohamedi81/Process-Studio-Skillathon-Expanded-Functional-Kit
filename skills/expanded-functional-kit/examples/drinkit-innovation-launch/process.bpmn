@@ -1,0 +1,717 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bioc="http://bpmn.io/schema/bpmn/biocolor/1.0" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:color="http://www.omg.org/spec/BPMN/non-normative/color/1.0" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:ef="https://expanded-functional-kit.example/schema/1.0" id="Definitions_1" targetNamespace="https://expanded-functional-kit.example/bpmn" exporter="expanded-functional-kit" exporterVersion="1.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="Participant_1" name="Product Innovation Launch: Expanded Functional Kit" processRef="Process_1" />
+  </bpmn:collaboration>
+  <bpmn:process id="Process_1" name="Product Innovation Launch: Expanded Functional Kit" isExecutable="false">
+    <bpmn:documentation>Product Innovation Launch: Expanded Functional Kit | Industry: Consumer goods (beverages) | Blueprint: product-innovation-launch(2).md. Green = deterministic, amber/red = agentic plug-in point, blue = human review.</bpmn:documentation>
+    <bpmn:laneSet id="LaneSet_1">
+      <bpmn:lane id="Lane_pmi" name="Innovation Project Manager (PM-I)">
+        <bpmn:flowNodeRef>Node_S03</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Node_S05</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Node_S12</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Node_S18</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_ra" name="Regulatory Affairs Specialist (RA)">
+        <bpmn:flowNodeRef>Node_S10</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_isc" name="ISC chair and secretariat">
+        <bpmn:flowNodeRef>Node_S14</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_eng" name="Deterministic rule engine (AGN2 / AGN4 backbone)">
+        <bpmn:flowNodeRef>Node_S00</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Node_S01</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Node_S04</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Node_GW1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Node_GW2</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Node_S06</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Node_GW3</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Node_S07</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Node_S08</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Node_GW4</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Node_S13</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Node_S15</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Node_GW5</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Node_S16</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Node_E1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Node_E2</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Node_E3</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_agn1" name="AGN1 Idea Intake and Screening Agent">
+        <bpmn:flowNodeRef>Node_S02</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_agn3" name="AGN3 Gate Narrative Drafting Agent">
+        <bpmn:flowNodeRef>Node_S11</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_agn5" name="AGN5 Regulatory Pre-Screen Agent">
+        <bpmn:flowNodeRef>Node_S09</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_agn6" name="AGN6 Post-Launch Review Agent">
+        <bpmn:flowNodeRef>Node_S17</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="Node_S00" name="Idea submitted">
+      <bpmn:outgoing>Flow_S00_S01</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="Node_S01" name="S01: ATS1 Register idea submission">
+      <bpmn:documentation>Registers the idea in the Idea Log with the next free ID.
+Rule: All 12 Idea Box fields present; next IDX-YYYY-nnn ID assigned; row written to the Idea Log.
+Autonomy zone: GREEN
+Reads: IDEA.title
+Writes: IDEA.idea_id, IDEA.status
+Integration INT_REG: Idea Box (Microsoft Forms), Idea Log TOL7 register_idea</bpmn:documentation>
+      <bpmn:extensionElements>
+        <ef:step id="S01" type="deterministic" zone="GREEN" rule="All 12 Idea Box fields present; next IDX-YYYY-nnn ID assigned; row written to the Idea Log." />
+        <ef:integrationCall integrationId="INT_REG" system="Idea Box (Microsoft Forms), Idea Log" operation="TOL7 register_idea" protocol="HTTPS/JSON" direction="write" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_S00_S01</bpmn:incoming>
+      <bpmn:outgoing>Flow_S01_S02</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Node_S02" name="S02: ATS2 Detect duplicate and related ideas" implementation="##WebService">
+      <bpmn:documentation>Proposes Duplicate, Related or Variant links against the Idea Log, Tracker and Archive.
+Autonomy zone: AMBER
+Reads: IDEA.title
+Writes: DUP.relation, DUP.similarity, DUP.confidence, DUP.rationale
+Integration INT_DUP: Innovation Evidence Library (vector index) TOL2 search over Idea Log, Tracker and Archive</bpmn:documentation>
+      <bpmn:extensionElements>
+        <ef:step id="S02" type="agentic" zone="AMBER" />
+        <ef:agenticPlugPoint integrationId="INT_DUP" agent="AGN1" mcpTool="TOL2 Search Innovation Evidence Library" system="Innovation Evidence Library (vector index)" operation="TOL2 search over Idea Log, Tracker and Archive" protocol="MCP over HTTPS" zone="AMBER" fallback="Keyword search on flavour, format and benefit; PM-I checks manually" reviewScreens="" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_S01_S02</bpmn:incoming>
+      <bpmn:outgoing>Flow_S02_S03</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="Node_S03" name="S03: Confirm duplicate and related links">
+      <bpmn:documentation>PM-I approves, rejects, modifies or escalates each proposed link.
+Autonomy zone: AMBER
+SLA: 3 working days, before the Friday Idea Log close
+Reads: DUP.relation, DUP.rationale
+Writes: DUP.decision, DUP.override_reason
+Integration INT_DUPDEC: Innovation Tracker TOL7 update_status</bpmn:documentation>
+      <bpmn:extensionElements>
+        <ef:step id="S03" type="human" zone="AMBER" sla="3 working days, before the Friday Idea Log close" />
+        <ef:integrationCall integrationId="INT_DUPDEC" system="Innovation Tracker" operation="TOL7 update_status" protocol="HTTPS/JSON" direction="write" />
+        <ef:screen id="SCR_DUP" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_S02_S03</bpmn:incoming>
+      <bpmn:outgoing>Flow_S03_S04</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="Node_S04" name="S04: ATS3 Calculate weighted screening score">
+      <bpmn:documentation>Applies the fixed matrix weights to the eight criteria scores.
+Rule: Weighted sum of eight criteria scored 1-10; score above 60 qualifies for the monthly Idea Screening meeting; Parked ideas get a review date.
+Autonomy zone: GREEN
+Writes: IDEA.weighted_score, IDEA.review_date
+Integration INT_SCORE: Rule engine TOL4 calc_type=screening</bpmn:documentation>
+      <bpmn:extensionElements>
+        <ef:step id="S04" type="deterministic" zone="GREEN" rule="Weighted sum of eight criteria scored 1-10; score above 60 qualifies for the monthly Idea Screening meeting; Parked ideas get a review date." />
+        <ef:integrationCall integrationId="INT_SCORE" system="Rule engine" operation="TOL4 calc_type=screening" protocol="MCP over HTTPS" direction="read" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_S03_S04</bpmn:incoming>
+      <bpmn:outgoing>Flow_S04_GW1</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Node_GW1" name="Score above 60?">
+      <bpmn:incoming>Flow_S04_GW1</bpmn:incoming>
+      <bpmn:outgoing>Flow_GW1_S05</bpmn:outgoing>
+      <bpmn:outgoing>Flow_GW1_E1</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="Node_S05" name="S05: Idea Screening vote">
+      <bpmn:documentation>Monthly 90-minute meeting: attendees vote proceed, park or reject.
+Autonomy zone: GREEN
+SLA: Monthly session; outcome sent to the submitter at once
+Reads: IDEA.title, IDEA.weighted_score
+Writes: IDEA.status, IDEA.review_date
+Integration INT_IDEAS: Idea Log TOL1 record_type=idea
+Integration INT_VOTE: Idea Log; Innovation Tracker TOL7 update_status</bpmn:documentation>
+      <bpmn:extensionElements>
+        <ef:step id="S05" type="human" zone="GREEN" sla="Monthly session; outcome sent to the submitter at once" />
+        <ef:integrationCall integrationId="INT_IDEAS" system="Idea Log" operation="TOL1 record_type=idea" protocol="HTTPS/JSON" direction="read" />
+        <ef:integrationCall integrationId="INT_VOTE" system="Idea Log; Innovation Tracker" operation="TOL7 update_status" protocol="HTTPS/JSON" direction="write" />
+        <ef:screen id="SCR_SCREEN" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_GW1_S05</bpmn:incoming>
+      <bpmn:outgoing>Flow_S05_GW2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Node_GW2" name="Vote outcome">
+      <bpmn:incoming>Flow_S05_GW2</bpmn:incoming>
+      <bpmn:outgoing>Flow_GW2_S06</bpmn:outgoing>
+      <bpmn:outgoing>Flow_GW2_E1</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="Node_S06" name="S06: ATS4 Validate gate request and allocate ISC slot">
+      <bpmn:documentation>Checks lead time and slot capacity and allocates an ISC slot.
+Rule: Request at least 3 weeks before the meeting; project, gate and decision sought stated; slots in request order; maximum 6 gates per meeting; overflow rolls to next month.
+Autonomy zone: GREEN
+Writes: GATE.slot_status, GATE.isc_meeting_date
+Integration INT_SLOT: ISC agenda register; Outlook calendar TOL3 rule_set=slot</bpmn:documentation>
+      <bpmn:extensionElements>
+        <ef:step id="S06" type="deterministic" zone="GREEN" rule="Request at least 3 weeks before the meeting; project, gate and decision sought stated; slots in request order; maximum 6 gates per meeting; overflow rolls to next month." />
+        <ef:integrationCall integrationId="INT_SLOT" system="ISC agenda register; Outlook calendar" operation="TOL3 rule_set=slot" protocol="MCP over HTTPS" direction="read" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_GW2_S06</bpmn:incoming>
+      <bpmn:incoming>Flow_GW5_S06</bpmn:incoming>
+      <bpmn:outgoing>Flow_S06_GW3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="Node_GW3" name="Fan out gate checks">
+      <bpmn:incoming>Flow_S06_GW3</bpmn:incoming>
+      <bpmn:outgoing>Flow_GW3_S07</bpmn:outgoing>
+      <bpmn:outgoing>Flow_GW3_S08</bpmn:outgoing>
+      <bpmn:outgoing>Flow_GW3_S09</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="Node_S07" name="S07: ATS5 Check pack completeness and SOP version">
+      <bpmn:documentation>Checks template version, mandatory slides, 15-slide cap and seven sign-offs.
+Rule: Template v3.2 for G0-G2 and v2.7 for G3-G5; all mandatory slides; main pack under 15 slides; seven functional sign-offs; flag OpCos on SOP v2.x.
+Autonomy zone: GREEN
+Writes: GATE.pack_slide_count, GATE.template_version, GATE.signoffs_received
+Integration INT_PACK: Gate folder (shared drive); SOP version register TOL3 rule_set=pack</bpmn:documentation>
+      <bpmn:extensionElements>
+        <ef:step id="S07" type="deterministic" zone="GREEN" rule="Template v3.2 for G0-G2 and v2.7 for G3-G5; all mandatory slides; main pack under 15 slides; seven functional sign-offs; flag OpCos on SOP v2.x." />
+        <ef:integrationCall integrationId="INT_PACK" system="Gate folder (shared drive); SOP version register" operation="TOL3 rule_set=pack" protocol="MCP over HTTPS" direction="read" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_GW3_S07</bpmn:incoming>
+      <bpmn:outgoing>Flow_S07_GW4</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Node_S08" name="S08: ATS7 Reconcile business case variances">
+      <bpmn:documentation>Runs the three SOP variance tests and routes breaches to the PM-I.
+Rule: COGS variance above 5%; forecast vs G2 volume above 15%; spend vs budget above 10%.
+Autonomy zone: GREEN
+Writes: GATE.cogs_variance_pct, GATE.forecast_variance_pct, GATE.spend_variance_pct
+Integration INT_VAR: SAP S/4HANA (ECC in 4 OpCos); SAP IBP; business case TOL4 and TOL5 variance tests</bpmn:documentation>
+      <bpmn:extensionElements>
+        <ef:step id="S08" type="deterministic" zone="GREEN" rule="COGS variance above 5%; forecast vs G2 volume above 15%; spend vs budget above 10%." />
+        <ef:integrationCall integrationId="INT_VAR" system="SAP S/4HANA (ECC in 4 OpCos); SAP IBP; business case" operation="TOL4 and TOL5 variance tests" protocol="HTTPS/JSON" direction="read" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_GW3_S08</bpmn:incoming>
+      <bpmn:outgoing>Flow_S08_GW4</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Node_S09" name="S09: ATS9 Pre-screen recipe, claims and label copy" implementation="##WebService">
+      <bpmn:documentation>Surfaces potential regulatory showstoppers per launch country. Never clears.
+Autonomy zone: RED
+Writes: REG.rule_id, REG.severity
+Integration INT_REGSCR: Country rules library; RA tracker; PLM Lite (Specright) TOL6 retrieval, then LLM interpretation per country</bpmn:documentation>
+      <bpmn:extensionElements>
+        <ef:step id="S09" type="agentic" zone="RED" />
+        <ef:agenticPlugPoint integrationId="INT_REGSCR" agent="AGN5" mcpTool="TOL6 Retrieve Regulatory Rule and Specification Set" system="Country rules library; RA tracker; PLM Lite (Specright)" operation="TOL6 retrieval, then LLM interpretation per country" protocol="MCP over HTTPS" zone="RED" fallback="Mark not screened and open an RA case" reviewScreens="" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_GW3_S09</bpmn:incoming>
+      <bpmn:outgoing>Flow_S09_S10</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="Node_S10" name="S10: RA disposition per country">
+      <bpmn:documentation>Country RA Specialist records a disposition for every finding and every no-finding result.
+Autonomy zone: RED
+SLA: Acknowledge in 2 working days; clear within 5 working days
+Reads: REG.rule_id, REG.severity
+Writes: REG.ra_disposition
+Integration INT_RACASE: Control Tower HITL queue; RA tracker TOL7 create_task and record disposition</bpmn:documentation>
+      <bpmn:extensionElements>
+        <ef:step id="S10" type="human" zone="RED" sla="Acknowledge in 2 working days; clear within 5 working days" />
+        <ef:integrationCall integrationId="INT_RACASE" system="Control Tower HITL queue; RA tracker" operation="TOL7 create_task and record disposition" protocol="HTTPS/JSON" direction="write" />
+        <ef:screen id="SCR_RA" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_S09_S10</bpmn:incoming>
+      <bpmn:outgoing>Flow_S10_GW4</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:parallelGateway id="Node_GW4" name="Join gate checks">
+      <bpmn:incoming>Flow_S07_GW4</bpmn:incoming>
+      <bpmn:incoming>Flow_S08_GW4</bpmn:incoming>
+      <bpmn:incoming>Flow_S10_GW4</bpmn:incoming>
+      <bpmn:outgoing>Flow_GW4_S11</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="Node_S11" name="S11: ATS6 Draft gate narrative" implementation="##WebService">
+      <bpmn:documentation>Drafts the cited narrative slides for the gate pack.
+Autonomy zone: AMBER
+Writes: GATE.narrative_draft, GATE.citation_coverage_pct
+Integration INT_DRAFT: Gate evidence documents; Innovation Tracker TOL2 retrieval, then cited drafting</bpmn:documentation>
+      <bpmn:extensionElements>
+        <ef:step id="S11" type="agentic" zone="AMBER" />
+        <ef:agenticPlugPoint integrationId="INT_DRAFT" agent="AGN3" mcpTool="TOL2 Search Innovation Evidence Library" system="Gate evidence documents; Innovation Tracker" operation="TOL2 retrieval, then cited drafting" protocol="MCP over HTTPS" zone="AMBER" fallback="Section-by-section drafting, then PM-I drafts from the template" reviewScreens="" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_GW4_S11</bpmn:incoming>
+      <bpmn:outgoing>Flow_S11_S12</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="Node_S12" name="S12: Review and approve gate pack">
+      <bpmn:documentation>PM-I validates every claim against its source; Category VP pre-review follows.
+Autonomy zone: AMBER
+SLA: Draft 8 working days before the gate; review done 5 working days before the meeting
+Reads: GATE.narrative_draft, GATE.citation_coverage_pct
+Writes: GATE.pack_status
+Integration INT_PACKAPPR: Innovation Tracker TOL7 update_status</bpmn:documentation>
+      <bpmn:extensionElements>
+        <ef:step id="S12" type="human" zone="AMBER" sla="Draft 8 working days before the gate; review done 5 working days before the meeting" />
+        <ef:integrationCall integrationId="INT_PACKAPPR" system="Innovation Tracker" operation="TOL7 update_status" protocol="HTTPS/JSON" direction="write" />
+        <ef:screen id="SCR_PACK" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_S11_S12</bpmn:incoming>
+      <bpmn:outgoing>Flow_S12_S13</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="Node_S13" name="S13: ATS10 Enforce gate prerequisites and release holds">
+      <bpmn:documentation>Releases the project to the ISC only when every prerequisite holds.
+Rule: Seven sign-offs; correct template; RA disposition recorded; funding routed; all OpCo G3 passes before global G3; G4 at least 8 weeks before first shipment.
+Autonomy zone: GREEN
+Writes: GATE.hold_reasons
+Integration INT_HOLD: Rule engine; RA tracker; GS1 portal TOL3 rule_set=release_hold</bpmn:documentation>
+      <bpmn:extensionElements>
+        <ef:step id="S13" type="deterministic" zone="GREEN" rule="Seven sign-offs; correct template; RA disposition recorded; funding routed; all OpCo G3 passes before global G3; G4 at least 8 weeks before first shipment." />
+        <ef:integrationCall integrationId="INT_HOLD" system="Rule engine; RA tracker; GS1 portal" operation="TOL3 rule_set=release_hold" protocol="MCP over HTTPS" direction="read" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_S12_S13</bpmn:incoming>
+      <bpmn:outgoing>Flow_S13_S14</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="Node_S14" name="S14: Record ISC chair decision">
+      <bpmn:documentation>The ISC chair states Go, Go with conditions, Recycle or Kill; the secretariat enters it.
+Autonomy zone: GREEN
+SLA: Recorded within 2 working days
+Reads: GATE.hold_reasons
+Writes: DEC.decision, DEC.conditions, DEC.decided_on</bpmn:documentation>
+      <bpmn:extensionElements>
+        <ef:step id="S14" type="human" zone="GREEN" sla="Recorded within 2 working days" />
+        <ef:screen id="SCR_DECISION" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_S13_S14</bpmn:incoming>
+      <bpmn:outgoing>Flow_S14_S15</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="Node_S15" name="S15: ATS11 Record gate decision and update portfolio">
+      <bpmn:documentation>Writes the decision to the Tracker, files the records and issues the action log.
+Rule: Decision and conditions written to the Tracker; pack, checklist and minutes filed to the gate folder; DocuSign at G2; Kill triggers a budget-release request.
+Autonomy zone: GREEN
+Writes: DEC.filed_path
+Integration INT_DECIDE: Innovation Tracker; gate folder; DocuSign (G2) TOL7 record_decision, file_record</bpmn:documentation>
+      <bpmn:extensionElements>
+        <ef:step id="S15" type="deterministic" zone="GREEN" rule="Decision and conditions written to the Tracker; pack, checklist and minutes filed to the gate folder; DocuSign at G2; Kill triggers a budget-release request." />
+        <ef:integrationCall integrationId="INT_DECIDE" system="Innovation Tracker; gate folder; DocuSign (G2)" operation="TOL7 record_decision, file_record" protocol="HTTPS/JSON" direction="write" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_S14_S15</bpmn:incoming>
+      <bpmn:outgoing>Flow_S15_GW5</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Node_GW5" name="ISC decision">
+      <bpmn:incoming>Flow_S15_GW5</bpmn:incoming>
+      <bpmn:outgoing>Flow_GW5_S06</bpmn:outgoing>
+      <bpmn:outgoing>Flow_GW5_E2</bpmn:outgoing>
+      <bpmn:outgoing>Flow_GW5_S16</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="Node_S16" name="S16: ATS12 Assemble G5 post-launch dataset">
+      <bpmn:documentation>Joins baselines locked at G2 with post-launch actuals into a variance table.
+Rule: G5 due date and on-time flag from the launch date; variance table of SAP volume, market data, QA data and internal order spend against G2 baselines.
+Autonomy zone: GREEN
+Writes: G5.npv_actual, G5.npv_variance_pct, G5.volume_actual, G5.volume_variance_pct
+Integration INT_G5DATA: Innovation Tracker; SAP; LIMS; Nielsen/Circana extracts TOL4 calc_type=g5_variance with TOL5</bpmn:documentation>
+      <bpmn:extensionElements>
+        <ef:step id="S16" type="deterministic" zone="GREEN" rule="G5 due date and on-time flag from the launch date; variance table of SAP volume, market data, QA data and internal order spend against G2 baselines." />
+        <ef:integrationCall integrationId="INT_G5DATA" system="Innovation Tracker; SAP; LIMS; Nielsen/Circana extracts" operation="TOL4 calc_type=g5_variance with TOL5" protocol="HTTPS/JSON and file drop" direction="read" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_GW5_S16</bpmn:incoming>
+      <bpmn:outgoing>Flow_S16_S17</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Node_S17" name="S17: ATS13 Synthesise post-launch review findings" implementation="##WebService">
+      <bpmn:documentation>Drafts root causes, lessons and a continue, renovate or retire recommendation.
+Autonomy zone: AMBER
+Writes: G5.findings, G5.recommendation
+Integration INT_SYNTH: Evidence library; G5 dataset TOL2 retrieval, then cited synthesis</bpmn:documentation>
+      <bpmn:extensionElements>
+        <ef:step id="S17" type="agentic" zone="AMBER" />
+        <ef:agenticPlugPoint integrationId="INT_SYNTH" agent="AGN6" mcpTool="TOL2 Search Innovation Evidence Library" system="Evidence library; G5 dataset" operation="TOL2 retrieval, then cited synthesis" protocol="MCP over HTTPS" zone="AMBER" fallback="PM-I and Innovation Finance Controller author the recommendation" reviewScreens="" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_S16_S17</bpmn:incoming>
+      <bpmn:outgoing>Flow_S17_S18</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="Node_S18" name="S18: Approve post-launch review for ISC">
+      <bpmn:documentation>PM-I and BM approve; the Innovation Finance Controller verifies financial variances.
+Autonomy zone: AMBER
+SLA: Within 5 working days of generation and before the G5 ISC slot
+Reads: G5.findings, G5.recommendation
+Writes: G5.review_status
+Integration INT_PACKAPPR: Innovation Tracker TOL7 update_status</bpmn:documentation>
+      <bpmn:extensionElements>
+        <ef:step id="S18" type="human" zone="AMBER" sla="Within 5 working days of generation and before the G5 ISC slot" />
+        <ef:integrationCall integrationId="INT_PACKAPPR" system="Innovation Tracker" operation="TOL7 update_status" protocol="HTTPS/JSON" direction="write" />
+        <ef:screen id="SCR_G5" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_S17_S18</bpmn:incoming>
+      <bpmn:outgoing>Flow_S18_E3</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="Node_E1" name="Idea parked or rejected">
+      <bpmn:incoming>Flow_GW1_E1</bpmn:incoming>
+      <bpmn:incoming>Flow_GW2_E1</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="Node_E2" name="Project killed">
+      <bpmn:incoming>Flow_GW5_E2</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="Node_E3" name="Post-launch review complete">
+      <bpmn:incoming>Flow_S18_E3</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_S00_S01" sourceRef="Node_S00" targetRef="Node_S01" />
+    <bpmn:sequenceFlow id="Flow_S01_S02" sourceRef="Node_S01" targetRef="Node_S02" />
+    <bpmn:sequenceFlow id="Flow_S02_S03" sourceRef="Node_S02" targetRef="Node_S03" />
+    <bpmn:sequenceFlow id="Flow_S03_S04" sourceRef="Node_S03" targetRef="Node_S04" />
+    <bpmn:sequenceFlow id="Flow_S04_GW1" sourceRef="Node_S04" targetRef="Node_GW1" />
+    <bpmn:sequenceFlow id="Flow_GW1_S05" sourceRef="Node_GW1" targetRef="Node_S05" name="Score above 60" />
+    <bpmn:sequenceFlow id="Flow_GW1_E1" sourceRef="Node_GW1" targetRef="Node_E1" name="Score 60 or below" />
+    <bpmn:sequenceFlow id="Flow_S05_GW2" sourceRef="Node_S05" targetRef="Node_GW2" />
+    <bpmn:sequenceFlow id="Flow_GW2_S06" sourceRef="Node_GW2" targetRef="Node_S06" name="Proceed" />
+    <bpmn:sequenceFlow id="Flow_GW2_E1" sourceRef="Node_GW2" targetRef="Node_E1" name="Park or reject" />
+    <bpmn:sequenceFlow id="Flow_S06_GW3" sourceRef="Node_S06" targetRef="Node_GW3" />
+    <bpmn:sequenceFlow id="Flow_GW3_S07" sourceRef="Node_GW3" targetRef="Node_S07" />
+    <bpmn:sequenceFlow id="Flow_GW3_S08" sourceRef="Node_GW3" targetRef="Node_S08" />
+    <bpmn:sequenceFlow id="Flow_GW3_S09" sourceRef="Node_GW3" targetRef="Node_S09" />
+    <bpmn:sequenceFlow id="Flow_S07_GW4" sourceRef="Node_S07" targetRef="Node_GW4" />
+    <bpmn:sequenceFlow id="Flow_S08_GW4" sourceRef="Node_S08" targetRef="Node_GW4" />
+    <bpmn:sequenceFlow id="Flow_S09_S10" sourceRef="Node_S09" targetRef="Node_S10" />
+    <bpmn:sequenceFlow id="Flow_S10_GW4" sourceRef="Node_S10" targetRef="Node_GW4" />
+    <bpmn:sequenceFlow id="Flow_GW4_S11" sourceRef="Node_GW4" targetRef="Node_S11" />
+    <bpmn:sequenceFlow id="Flow_S11_S12" sourceRef="Node_S11" targetRef="Node_S12" />
+    <bpmn:sequenceFlow id="Flow_S12_S13" sourceRef="Node_S12" targetRef="Node_S13" />
+    <bpmn:sequenceFlow id="Flow_S13_S14" sourceRef="Node_S13" targetRef="Node_S14" />
+    <bpmn:sequenceFlow id="Flow_S14_S15" sourceRef="Node_S14" targetRef="Node_S15" />
+    <bpmn:sequenceFlow id="Flow_S15_GW5" sourceRef="Node_S15" targetRef="Node_GW5" />
+    <bpmn:sequenceFlow id="Flow_GW5_S06" sourceRef="Node_GW5" targetRef="Node_S06" name="Recycle: return to re-entry step" />
+    <bpmn:sequenceFlow id="Flow_GW5_E2" sourceRef="Node_GW5" targetRef="Node_E2" name="Kill" />
+    <bpmn:sequenceFlow id="Flow_GW5_S16" sourceRef="Node_GW5" targetRef="Node_S16" name="Go or Go with conditions" />
+    <bpmn:sequenceFlow id="Flow_S16_S17" sourceRef="Node_S16" targetRef="Node_S17" />
+    <bpmn:sequenceFlow id="Flow_S17_S18" sourceRef="Node_S17" targetRef="Node_S18" />
+    <bpmn:sequenceFlow id="Flow_S18_E3" sourceRef="Node_S18" targetRef="Node_E3" />
+    <bpmn:textAnnotation id="Ann_S02">
+      <bpmn:text>PLUG-IN POINT AGN1 | TOL2 Search Innovation Evidence Library | AMBER</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Assoc_S02" sourceRef="Node_S02" targetRef="Ann_S02" associationDirection="None" />
+    <bpmn:textAnnotation id="Ann_S09">
+      <bpmn:text>PLUG-IN POINT AGN5 | TOL6 Retrieve Regulatory Rule and Specification Set | RED</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Assoc_S09" sourceRef="Node_S09" targetRef="Ann_S09" associationDirection="None" />
+    <bpmn:textAnnotation id="Ann_S11">
+      <bpmn:text>PLUG-IN POINT AGN3 | TOL2 Search Innovation Evidence Library | AMBER</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Assoc_S11" sourceRef="Node_S11" targetRef="Ann_S11" associationDirection="None" />
+    <bpmn:textAnnotation id="Ann_S17">
+      <bpmn:text>PLUG-IN POINT AGN6 | TOL2 Search Innovation Evidence Library | AMBER</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Assoc_S17" sourceRef="Node_S17" targetRef="Ann_S17" associationDirection="None" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_1">
+    <bpmndi:BPMNPlane id="Plane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="Shape_Participant_1" bpmnElement="Participant_1" isHorizontal="true">
+        <dc:Bounds x="40" y="40" width="5430" height="1420" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_pmi" bpmnElement="Lane_pmi" isHorizontal="true">
+        <dc:Bounds x="70" y="40" width="5400" height="160" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_ra" bpmnElement="Lane_ra" isHorizontal="true">
+        <dc:Bounds x="70" y="200" width="5400" height="160" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_isc" bpmnElement="Lane_isc" isHorizontal="true">
+        <dc:Bounds x="70" y="360" width="5400" height="160" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_eng" bpmnElement="Lane_eng" isHorizontal="true">
+        <dc:Bounds x="70" y="520" width="5400" height="300" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_agn1" bpmnElement="Lane_agn1" isHorizontal="true">
+        <dc:Bounds x="70" y="820" width="5400" height="160" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_agn3" bpmnElement="Lane_agn3" isHorizontal="true">
+        <dc:Bounds x="70" y="980" width="5400" height="160" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_agn5" bpmnElement="Lane_agn5" isHorizontal="true">
+        <dc:Bounds x="70" y="1140" width="5400" height="160" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_agn6" bpmnElement="Lane_agn6" isHorizontal="true">
+        <dc:Bounds x="70" y="1300" width="5400" height="160" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Node_S00" bpmnElement="Node_S00" bioc:fill="#ffffff" bioc:stroke="#2e7d32" color:background-color="#ffffff" color:border-color="#2e7d32">
+        <dc:Bounds x="122" y="577" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="82" y="617" width="116" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Node_S01" bpmnElement="Node_S01" bioc:fill="#e8f5e9" bioc:stroke="#2e7d32" color:background-color="#e8f5e9" color:border-color="#2e7d32">
+        <dc:Bounds x="305" y="555" width="130" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Node_S02" bpmnElement="Node_S02" bioc:fill="#fff3cd" bioc:stroke="#b26a00" color:background-color="#fff3cd" color:border-color="#b26a00">
+        <dc:Bounds x="535" y="869" width="130" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Node_S03" bpmnElement="Node_S03" bioc:fill="#e3f2fd" bioc:stroke="#1565c0" color:background-color="#e3f2fd" color:border-color="#1565c0">
+        <dc:Bounds x="765" y="80" width="130" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Node_S04" bpmnElement="Node_S04" bioc:fill="#e8f5e9" bioc:stroke="#2e7d32" color:background-color="#e8f5e9" color:border-color="#2e7d32">
+        <dc:Bounds x="995" y="555" width="130" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Node_GW1" bpmnElement="Node_GW1" bioc:fill="#ffffff" bioc:stroke="#424242" color:background-color="#ffffff" color:border-color="#424242">
+        <dc:Bounds x="1265" y="570" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1235" y="540" width="110" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Node_S05" bpmnElement="Node_S05" bioc:fill="#e3f2fd" bioc:stroke="#1565c0" color:background-color="#e3f2fd" color:border-color="#1565c0">
+        <dc:Bounds x="1455" y="80" width="130" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Node_GW2" bpmnElement="Node_GW2" bioc:fill="#ffffff" bioc:stroke="#424242" color:background-color="#ffffff" color:border-color="#424242">
+        <dc:Bounds x="1725" y="570" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1695" y="540" width="110" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Node_S06" bpmnElement="Node_S06" bioc:fill="#e8f5e9" bioc:stroke="#2e7d32" color:background-color="#e8f5e9" color:border-color="#2e7d32">
+        <dc:Bounds x="1915" y="555" width="130" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Node_GW3" bpmnElement="Node_GW3" bioc:fill="#ffffff" bioc:stroke="#424242" color:background-color="#ffffff" color:border-color="#424242">
+        <dc:Bounds x="2185" y="570" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2155" y="540" width="110" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Node_S07" bpmnElement="Node_S07" bioc:fill="#e8f5e9" bioc:stroke="#2e7d32" color:background-color="#e8f5e9" color:border-color="#2e7d32">
+        <dc:Bounds x="2375" y="555" width="130" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Node_S08" bpmnElement="Node_S08" bioc:fill="#e8f5e9" bioc:stroke="#2e7d32" color:background-color="#e8f5e9" color:border-color="#2e7d32">
+        <dc:Bounds x="2375" y="705" width="130" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Node_S09" bpmnElement="Node_S09" bioc:fill="#fde8e8" bioc:stroke="#c62828" color:background-color="#fde8e8" color:border-color="#c62828">
+        <dc:Bounds x="2375" y="1189" width="130" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Node_S10" bpmnElement="Node_S10" bioc:fill="#e3f2fd" bioc:stroke="#1565c0" color:background-color="#e3f2fd" color:border-color="#1565c0">
+        <dc:Bounds x="2605" y="240" width="130" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Node_GW4" bpmnElement="Node_GW4" bioc:fill="#ffffff" bioc:stroke="#424242" color:background-color="#ffffff" color:border-color="#424242">
+        <dc:Bounds x="2875" y="570" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2845" y="540" width="110" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Node_S11" bpmnElement="Node_S11" bioc:fill="#fff3cd" bioc:stroke="#b26a00" color:background-color="#fff3cd" color:border-color="#b26a00">
+        <dc:Bounds x="3065" y="1029" width="130" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Node_S12" bpmnElement="Node_S12" bioc:fill="#e3f2fd" bioc:stroke="#1565c0" color:background-color="#e3f2fd" color:border-color="#1565c0">
+        <dc:Bounds x="3295" y="80" width="130" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Node_S13" bpmnElement="Node_S13" bioc:fill="#e8f5e9" bioc:stroke="#2e7d32" color:background-color="#e8f5e9" color:border-color="#2e7d32">
+        <dc:Bounds x="3525" y="555" width="130" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Node_S14" bpmnElement="Node_S14" bioc:fill="#e3f2fd" bioc:stroke="#1565c0" color:background-color="#e3f2fd" color:border-color="#1565c0">
+        <dc:Bounds x="3755" y="400" width="130" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Node_S15" bpmnElement="Node_S15" bioc:fill="#e8f5e9" bioc:stroke="#2e7d32" color:background-color="#e8f5e9" color:border-color="#2e7d32">
+        <dc:Bounds x="3985" y="555" width="130" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Node_GW5" bpmnElement="Node_GW5" bioc:fill="#ffffff" bioc:stroke="#424242" color:background-color="#ffffff" color:border-color="#424242">
+        <dc:Bounds x="4255" y="570" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4225" y="540" width="110" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Node_S16" bpmnElement="Node_S16" bioc:fill="#e8f5e9" bioc:stroke="#2e7d32" color:background-color="#e8f5e9" color:border-color="#2e7d32">
+        <dc:Bounds x="4445" y="555" width="130" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Node_S17" bpmnElement="Node_S17" bioc:fill="#fff3cd" bioc:stroke="#b26a00" color:background-color="#fff3cd" color:border-color="#b26a00">
+        <dc:Bounds x="4675" y="1349" width="130" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Node_S18" bpmnElement="Node_S18" bioc:fill="#e3f2fd" bioc:stroke="#1565c0" color:background-color="#e3f2fd" color:border-color="#1565c0">
+        <dc:Bounds x="4905" y="80" width="130" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Node_E1" bpmnElement="Node_E1" bioc:fill="#ffffff" bioc:stroke="#c62828" color:background-color="#ffffff" color:border-color="#c62828">
+        <dc:Bounds x="1962" y="727" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1922" y="767" width="116" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Node_E2" bpmnElement="Node_E2" bioc:fill="#ffffff" bioc:stroke="#c62828" color:background-color="#ffffff" color:border-color="#c62828">
+        <dc:Bounds x="4492" y="727" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4452" y="767" width="116" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Node_E3" bpmnElement="Node_E3" bioc:fill="#ffffff" bioc:stroke="#c62828" color:background-color="#ffffff" color:border-color="#c62828">
+        <dc:Bounds x="5182" y="577" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="5142" y="617" width="116" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Ann_S02" bpmnElement="Ann_S02">
+        <dc:Bounds x="510" y="815" width="180" height="44" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Ann_S09" bpmnElement="Ann_S09">
+        <dc:Bounds x="2350" y="1135" width="180" height="44" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Ann_S11" bpmnElement="Ann_S11">
+        <dc:Bounds x="3040" y="975" width="180" height="44" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Ann_S17" bpmnElement="Ann_S17">
+        <dc:Bounds x="4650" y="1295" width="180" height="44" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Flow_S00_S01" bpmnElement="Flow_S00_S01">
+        <di:waypoint x="158" y="595" />
+        <di:waypoint x="305" y="595" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S01_S02" bpmnElement="Flow_S01_S02">
+        <di:waypoint x="435" y="595" />
+        <di:waypoint x="495" y="595" />
+        <di:waypoint x="495" y="909" />
+        <di:waypoint x="535" y="909" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S02_S03" bpmnElement="Flow_S02_S03">
+        <di:waypoint x="665" y="909" />
+        <di:waypoint x="725" y="909" />
+        <di:waypoint x="725" y="120" />
+        <di:waypoint x="765" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S03_S04" bpmnElement="Flow_S03_S04">
+        <di:waypoint x="895" y="120" />
+        <di:waypoint x="955" y="120" />
+        <di:waypoint x="955" y="595" />
+        <di:waypoint x="995" y="595" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S04_GW1" bpmnElement="Flow_S04_GW1">
+        <di:waypoint x="1125" y="595" />
+        <di:waypoint x="1265" y="595" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_GW1_S05" bpmnElement="Flow_GW1_S05">
+        <di:waypoint x="1315" y="595" />
+        <di:waypoint x="1415" y="595" />
+        <di:waypoint x="1415" y="120" />
+        <di:waypoint x="1455" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_GW1_E1" bpmnElement="Flow_GW1_E1">
+        <di:waypoint x="1315" y="595" />
+        <di:waypoint x="1922" y="595" />
+        <di:waypoint x="1922" y="745" />
+        <di:waypoint x="1962" y="745" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S05_GW2" bpmnElement="Flow_S05_GW2">
+        <di:waypoint x="1585" y="120" />
+        <di:waypoint x="1685" y="120" />
+        <di:waypoint x="1685" y="595" />
+        <di:waypoint x="1725" y="595" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_GW2_S06" bpmnElement="Flow_GW2_S06">
+        <di:waypoint x="1775" y="595" />
+        <di:waypoint x="1915" y="595" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_GW2_E1" bpmnElement="Flow_GW2_E1">
+        <di:waypoint x="1775" y="595" />
+        <di:waypoint x="1922" y="595" />
+        <di:waypoint x="1922" y="745" />
+        <di:waypoint x="1962" y="745" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S06_GW3" bpmnElement="Flow_S06_GW3">
+        <di:waypoint x="2045" y="595" />
+        <di:waypoint x="2185" y="595" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_GW3_S07" bpmnElement="Flow_GW3_S07">
+        <di:waypoint x="2235" y="595" />
+        <di:waypoint x="2375" y="595" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_GW3_S08" bpmnElement="Flow_GW3_S08">
+        <di:waypoint x="2235" y="595" />
+        <di:waypoint x="2335" y="595" />
+        <di:waypoint x="2335" y="745" />
+        <di:waypoint x="2375" y="745" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_GW3_S09" bpmnElement="Flow_GW3_S09">
+        <di:waypoint x="2235" y="595" />
+        <di:waypoint x="2335" y="595" />
+        <di:waypoint x="2335" y="1229" />
+        <di:waypoint x="2375" y="1229" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S07_GW4" bpmnElement="Flow_S07_GW4">
+        <di:waypoint x="2505" y="595" />
+        <di:waypoint x="2875" y="595" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S08_GW4" bpmnElement="Flow_S08_GW4">
+        <di:waypoint x="2505" y="745" />
+        <di:waypoint x="2835" y="745" />
+        <di:waypoint x="2835" y="595" />
+        <di:waypoint x="2875" y="595" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S09_S10" bpmnElement="Flow_S09_S10">
+        <di:waypoint x="2505" y="1229" />
+        <di:waypoint x="2565" y="1229" />
+        <di:waypoint x="2565" y="280" />
+        <di:waypoint x="2605" y="280" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S10_GW4" bpmnElement="Flow_S10_GW4">
+        <di:waypoint x="2735" y="280" />
+        <di:waypoint x="2835" y="280" />
+        <di:waypoint x="2835" y="595" />
+        <di:waypoint x="2875" y="595" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_GW4_S11" bpmnElement="Flow_GW4_S11">
+        <di:waypoint x="2925" y="595" />
+        <di:waypoint x="3025" y="595" />
+        <di:waypoint x="3025" y="1069" />
+        <di:waypoint x="3065" y="1069" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S11_S12" bpmnElement="Flow_S11_S12">
+        <di:waypoint x="3195" y="1069" />
+        <di:waypoint x="3255" y="1069" />
+        <di:waypoint x="3255" y="120" />
+        <di:waypoint x="3295" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S12_S13" bpmnElement="Flow_S12_S13">
+        <di:waypoint x="3425" y="120" />
+        <di:waypoint x="3485" y="120" />
+        <di:waypoint x="3485" y="595" />
+        <di:waypoint x="3525" y="595" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S13_S14" bpmnElement="Flow_S13_S14">
+        <di:waypoint x="3655" y="595" />
+        <di:waypoint x="3715" y="595" />
+        <di:waypoint x="3715" y="440" />
+        <di:waypoint x="3755" y="440" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S14_S15" bpmnElement="Flow_S14_S15">
+        <di:waypoint x="3885" y="440" />
+        <di:waypoint x="3945" y="440" />
+        <di:waypoint x="3945" y="595" />
+        <di:waypoint x="3985" y="595" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S15_GW5" bpmnElement="Flow_S15_GW5">
+        <di:waypoint x="4115" y="595" />
+        <di:waypoint x="4255" y="595" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_GW5_S06" bpmnElement="Flow_GW5_S06">
+        <di:waypoint x="4280" y="620" />
+        <di:waypoint x="4280" y="661" />
+        <di:waypoint x="1980" y="661" />
+        <di:waypoint x="1980" y="635" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_GW5_E2" bpmnElement="Flow_GW5_E2">
+        <di:waypoint x="4305" y="595" />
+        <di:waypoint x="4452" y="595" />
+        <di:waypoint x="4452" y="745" />
+        <di:waypoint x="4492" y="745" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_GW5_S16" bpmnElement="Flow_GW5_S16">
+        <di:waypoint x="4305" y="595" />
+        <di:waypoint x="4445" y="595" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S16_S17" bpmnElement="Flow_S16_S17">
+        <di:waypoint x="4575" y="595" />
+        <di:waypoint x="4635" y="595" />
+        <di:waypoint x="4635" y="1389" />
+        <di:waypoint x="4675" y="1389" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S17_S18" bpmnElement="Flow_S17_S18">
+        <di:waypoint x="4805" y="1389" />
+        <di:waypoint x="4865" y="1389" />
+        <di:waypoint x="4865" y="120" />
+        <di:waypoint x="4905" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S18_E3" bpmnElement="Flow_S18_E3">
+        <di:waypoint x="5035" y="120" />
+        <di:waypoint x="5142" y="120" />
+        <di:waypoint x="5142" y="595" />
+        <di:waypoint x="5182" y="595" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Assoc_S02" bpmnElement="Assoc_S02">
+        <di:waypoint x="600" y="869" />
+        <di:waypoint x="600" y="859" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Assoc_S09" bpmnElement="Assoc_S09">
+        <di:waypoint x="2440" y="1189" />
+        <di:waypoint x="2440" y="1179" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Assoc_S11" bpmnElement="Assoc_S11">
+        <di:waypoint x="3130" y="1029" />
+        <di:waypoint x="3130" y="1019" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Assoc_S17" bpmnElement="Assoc_S17">
+        <di:waypoint x="4740" y="1349" />
+        <di:waypoint x="4740" y="1339" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
